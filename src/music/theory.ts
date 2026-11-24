@@ -62,17 +62,18 @@ export const SCALES = {
 
 export type ScaleKind = keyof typeof SCALES
 
+export function spellDegree(root: number, degree: number, offset: number, spelling: Spelling = 'common') {
+  const rootLetter = letters.indexOf(noteName(root, spelling)[0])
+  const letter = (rootLetter + degree - 1) % letters.length
+  const pitch = pitchClass(root + offset)
+  const accidental = pitchClass(pitch - naturalPitches[letter] + 6) - 6
+  const name = letters[letter] + (accidental < 0 ? '♭'.repeat(-accidental) : '♯'.repeat(accidental))
+  return { pitch, name, degree }
+}
+
 export function scaleNotes(root: number, kind: ScaleKind, spelling: Spelling = 'sharps') {
   const scale = SCALES[kind]
-  const rootLetter = letters.indexOf(noteName(root, spelling)[0])
-  return scale.semitones.map((offset, index) => {
-    const degree = scale.degrees[index]
-    const letter = (rootLetter + degree - 1) % letters.length
-    const pitch = pitchClass(root + offset)
-    const accidental = pitchClass(pitch - naturalPitches[letter] + 6) - 6
-    const name = letters[letter] + (accidental < 0 ? '♭'.repeat(-accidental) : '♯'.repeat(accidental))
-    return { pitch, name, degree }
-  })
+  return scale.semitones.map((offset, index) => spellDegree(root, scale.degrees[index], offset, spelling))
 }
 
 export const INTERVALS = [

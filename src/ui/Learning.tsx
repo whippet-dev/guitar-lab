@@ -6,8 +6,9 @@ import { feedbackFor, isCorrect, solutionFor } from '../learning/exercise'
 import { SESSION_MINUTES, topicProgress, type Progress, type Response, type Session } from '../learning/progress'
 import { Fretboard, noteMarker } from './Fretboard'
 import { AudioButton } from './AudioButton'
+import { IntervalLab, ScaleLab } from './RelationshipLabs'
 
-export function LessonBody({ topic }: { topic: Topic }) {
+function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Position] }> }) {
   const [selected, setSelected] = useState<Position | null>(null)
   const [reveal, setReveal] = useState<Position | null>(null)
   const [from, to] = topic.demo
@@ -15,7 +16,6 @@ export function LessonBody({ topic }: { topic: Topic }) {
 
   return (
     <>
-      <p className="teaching-copy">{topic.intro}</p>
       <div className="demo-controls">
         <div className="demo-positions" role="group" aria-label="Demonstration notes">
           {topic.demo.map((position, index) => <button type="button" className="button button-secondary" key={index}
@@ -31,12 +31,19 @@ export function LessonBody({ topic }: { topic: Topic }) {
         </> : <span>Try the two marked positions on the fretboard.</span>}</div>
         {pitch !== null && <AudioButton pitches={[pitch]} label="Hear note" />}
       </div>
-      <details className="explanation">
+    </>
+  )
+}
+
+export function LessonBody({ topic }: { topic: Topic }) {
+  return <>
+    <p className="teaching-copy">{topic.intro}</p>
+    {topic.activity === undefined ? <PositionDemo topic={topic} /> : topic.activity === 'intervals' ? <IntervalLab /> : <ScaleLab />}
+    <details className="explanation">
         <summary><CircleHelp size={17} /> Why does this work?</summary>
         <p>{topic.detail}</p>
       </details>
-    </>
-  )
+  </>
 }
 
 export function ExerciseBody({ exercise, response, onResponse }: {
@@ -45,6 +52,7 @@ export function ExerciseBody({ exercise, response, onResponse }: {
   const [hint, setHint] = useState(false)
   const [reveal, setReveal] = useState<Position | null>(null)
   const finished = !!response && response.result !== 'retry'
+  const anchor = exercise.anchor
 
   function submit(position: Position) {
     onResponse({ result: isCorrect(exercise, position) ? 'correct' : 'retry', position })
@@ -60,7 +68,8 @@ export function ExerciseBody({ exercise, response, onResponse }: {
     <>
       <p className="teaching-copy">Tap a position on the fretboard.</p>
       <Fretboard range={exercise.range} guideString={exercise.string} selected={response?.position} onSelect={submit} locked={finished}
-        reveal={reveal ?? response?.position} marker={(position) => samePosition(response?.position, position) ? noteMarker(position, finished ? 'root' : undefined) : undefined} />
+        reveal={reveal ?? response?.position ?? anchor} marker={(position) => samePosition(response?.position, position) ? noteMarker(position, finished ? 'target' : undefined)
+          : samePosition(anchor, position) ? noteMarker(position, 'root') : undefined} />
       <div className="exercise-feedback" aria-live="polite" role="status">
         {response && <div className={`feedback-box ${finished ? 'is-finished' : ''}`}>
           {response.result === 'correct' ? <Check size={20} /> : <Lightbulb size={20} />}
@@ -73,7 +82,7 @@ export function ExerciseBody({ exercise, response, onResponse }: {
           <button className="button button-secondary" type="button" aria-expanded={hint} aria-controls="exercise-hint" onClick={() => setHint(!hint)}><Lightbulb size={17} />{hint ? 'Hide hint' : 'Get a hint'}</button>
           <button className="button button-quiet" type="button" onClick={showAnswer}>Show answer</button>
         </>}
-        {finished && <AudioButton pitches={[pitchAt(response.position)]} label="Hear the answer" />}
+        {finished && <AudioButton pitches={anchor ? [pitchAt(anchor), pitchAt(response.position)].sort((a, b) => a - b) : [pitchAt(response.position)]} label="Hear the answer" />}
       </div>
       {!finished && <p id="exercise-hint" className="hint" hidden={!hint}>{exercise.hint}</p>}
     </>
@@ -81,6 +90,7 @@ export function ExerciseBody({ exercise, response, onResponse }: {
 }
 
 export function Library({ progress }: { progress: Progress }) {
+  const groups = [...new Set(TOPICS.map((topic) => topic.group ?? 'Fretboard foundations'))]
   return (
     <>
       <div className="page-heading">
@@ -88,16 +98,16 @@ export function Library({ progress }: { progress: Progress }) {
         <h1 tabIndex={-1}>Learn at your own pace</h1>
         <p>Start with the landmarks, or choose an idea you’d like to practise.</p>
       </div>
-      <section className="panel library-list" aria-label="Fretboard foundations">
-        <h2>Fretboard foundations</h2>
-        {TOPICS.map((topic) => <a key={topic.id} className="library-row" href={`#learn/${topic.id}`} aria-labelledby={`lesson-${topic.id}`}>
+      {groups.map((group) => <section key={group} className="panel library-list" aria-label={group}>
+        <h2>{group}</h2>
+        {TOPICS.filter((topic) => (topic.group ?? 'Fretboard foundations') === group).map((topic) => <a key={topic.id} className="library-row" href={`#learn/${topic.id}`} aria-labelledby={`lesson-${topic.id}`}>
           <span className="card-icon"><BookOpen size={21} /></span>
           <div><h3 id={`lesson-${topic.id}`}>{topic.title}</h3><p>{topic.description}</p>
             {progress.lessons.includes(topic.id) && <span className="lesson-state"><Check size={15} /> Lesson explored</span>}
           </div>
           <span className="icon-link"><ChevronRight size={23} /></span>
         </a>)}
-      </section>
+      </section>)}
     </>
   )
 }
@@ -108,7 +118,7 @@ export function Lesson({ topic, onRead }: { topic: Topic; onRead: () => void }) 
     <div className="learning-layout">
       <a className="back-link" href="#learn"><ArrowLeft size={16} /> All lessons</a>
       <section className="panel lesson-panel">
-        <div className="eyebrow"><BookOpen size={16} /> Fretboard foundations</div>
+        <div className="eyebrow"><BookOpen size={16} /> {topic.group ?? 'Fretboard foundations'}</div>
         <h1 tabIndex={-1}>{topic.title}</h1>
         <LessonBody key={topic.id} topic={topic} />
         {first && <div className="learning-actions"><a href={`#exercise/${first.id}`} onClick={onRead} className="button button-primary">Try an exercise<ArrowRight size={19} /></a></div>}
@@ -195,7 +205,7 @@ export function ProgressView({ progress }: { progress: Progress }) {
         <p>See the ideas you’ve worked on and what could use another look.</p>
       </div>
       <section className="panel library-list" aria-label="Learning history">
-        <h2>Fretboard foundations</h2>
+        <h2>Learning topics</h2>
         <p className="progress-total">{progress.sessionsCompleted === 0 ? 'Your completed daily sessions will appear here.' : `${progress.sessionsCompleted} daily ${progress.sessionsCompleted === 1 ? 'session' : 'sessions'} completed`}</p>
         {TOPICS.map((topic) => {
           const status = topicProgress(progress, topic.id)

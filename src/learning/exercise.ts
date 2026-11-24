@@ -26,6 +26,11 @@ export function feedbackFor(exercise: Exercise, position: Position) {
   if (exercise.string !== undefined && position.string !== exercise.string) {
     return `You found ${pitch} at ${location.toLowerCase()}. Try again on the ${STRINGS[exercise.string].name} string.`
   }
+  if (exercise.anchor) {
+    const distance = pitchAt(position) - pitchAt(exercise.anchor)
+    if (distance === 0) return 'That’s the starting pitch. Try the note that completes the relationship.'
+    return `That’s ${pitch}, ${Math.abs(distance)} ${Math.abs(distance) === 1 ? 'semitone' : 'semitones'} ${distance > 0 ? 'above' : 'below'} the marked note. ${exercise.hint}`
+  }
   const fret = solutionFor(exercise).fret
   const direction = position.fret < fret ? 'a higher' : 'a lower'
   return `That’s ${pitch}. Stay on this string and try ${direction} fret.`

@@ -1,18 +1,18 @@
 import type { Position, StringIndex } from '../music/theory'
+import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales'
 
 export type Topic = {
   id: TopicId
+  group?: 'Scales and intervals'
   title: string
   description: string
   intro: string
   detail: string
-  demo: [Position, Position]
-  demoLabels: [string, string]
   task: string
   taskPositions: readonly Position[]
-}
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -42,6 +42,7 @@ export const TOPICS: readonly Topic[] = [
     task: 'Listen to a phrase on the low E string at frets 0, 1 and 3, then hear it again at 12, 13 and 15. Hum along and notice what stays the same. Try both versions in the explorer or on your guitar.',
     taskPositions: [0, 1, 3, 12, 13, 15].map((fret) => ({ string: 5, fret })),
   },
+  ...RELATIONSHIP_TOPICS,
 ]
 
 type Answer =
@@ -57,6 +58,7 @@ export type Exercise = {
   why: string
   range: [number, number]
   string?: StringIndex
+  anchor?: Position
   answer: Answer
 }
 
@@ -115,6 +117,7 @@ export const EXERCISES: readonly Exercise[] = [
     why: 'Fret 15 on the B string is D. Fret 3 is also D, an octave lower.',
     range: [0, 5], string: 1, answer: { kind: 'pitch', midi: 62 },
   },
+  ...RELATIONSHIP_EXERCISES,
 ]
 
 export function findTopic(id: string) {

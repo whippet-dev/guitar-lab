@@ -126,6 +126,18 @@ h1:focus, main:focus { outline: none; }
 .demo-positions, .learning-actions, .exercise-tools { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 8px; }
 .learning-actions { margin-top: 20px; }
 .learning-actions .button-primary { min-height: 47px; }
+.library-list + .library-list { margin-top: 16px; }
+.music-lab { display: grid; gap: 10px; min-width: 0; }
+.lab-controls, .lab-choices, .lab-result { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.lab-result { align-items: center; justify-content: space-between; }
+.lab-result p { color: var(--muted); font-size: .875rem; }
+.lab-result strong { color: var(--accent); }
+.lab-select { display: grid; gap: 4px; font-size: .75rem; color: var(--muted); font-weight: 750; }
+.lab-select select { border: 1px solid #4c3b61; min-height: 44px; border-radius: 8px; padding: 6px 10px; background: var(--raised); color: var(--text); font: inherit; font-size: .9rem; }
+.lab-sequence { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); max-width: 400px; gap: 4px; }
+.lab-sequence span { display: grid; place-items: center; min-height: 34px; border-radius: 7px; border: 1px solid var(--border); color: var(--dim); font-size: .8rem; font-weight: 760; }
+.lab-sequence .is-filled { color: #efe0ff; background: #332645; border-color: #625078; }
+.music-lab button:disabled { cursor: default; opacity: .55; }
 .audio-control { display: inline-flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .muted { color: var(--muted); font-size: .85rem; }
 .explanation { border-top: 1px solid var(--border); margin-top: 15px; padding-top: 3px; }

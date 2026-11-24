@@ -27,11 +27,14 @@ export const SESSION_MINUTES = 5
 const DAY = 86_400_000
 
 export function topicProgress(progress: Progress, topic: TopicId) {
-  const recent = progress.attempts.filter(({ exercise }) => findExercise(exercise)?.topic === topic).slice(-3)
+  const attempts = progress.attempts.filter(({ exercise }) => findExercise(exercise)?.topic === topic)
+  const recent = attempts.slice(-3)
   const last = recent.at(-1)
   const correct = recent.filter(({ result }) => result === 'correct').length
+  const distinctCorrect = new Set(attempts.filter(({ result }) => result === 'correct').map(({ exercise }) => exercise))
   return {
-    established: correct >= 2 && last?.result === 'correct',
+    established: new Set(recent.filter(({ result }) => result === 'correct').map(({ exercise }) => exercise)).size >= 2 && last?.result === 'correct',
+    familiar: distinctCorrect.size >= 2,
     attempted: recent.length > 0,
     misses: recent.length - correct,
     lastAt: last?.at ?? 0,
@@ -40,18 +43,20 @@ export function topicProgress(progress: Progress, topic: TopicId) {
 
 export function planSession(progress: Progress, id: string, now: number): Session {
   const skills = TOPICS.map(({ id: topic }) => ({ topic, ...topicProgress(progress, topic) }))
-  const next = skills.find(({ established }) => !established)
+  const next = skills.find(({ familiar }) => !familiar)
   const reviewPriority = (skill: typeof skills[number]) => (now - skill.lastAt) / DAY + skill.misses * 2
-  const focus = next ?? [...skills].sort((a, b) => reviewPriority(b) - reviewPriority(a))[0]
+  const review = skills.filter(({ familiar }) => familiar).sort((a, b) => reviewPriority(b) - reviewPriority(a))
+  const focus = next ?? review[0]
   const focusIndex = skills.indexOf(focus)
   const lastSeen = new Map(progress.attempts.map(({ exercise, at }) => [exercise, at]))
+  const lastSession = new Set(progress.session?.exercises ?? [])
   const promptsFor = (topic: TopicId) => EXERCISES.filter((exercise) => exercise.topic === topic)
-    .sort((a, b) => (lastSeen.get(a.id) ?? 0) - (lastSeen.get(b.id) ?? 0))
+    .sort((a, b) => Number(lastSession.has(a.id)) - Number(lastSession.has(b.id)) || (lastSeen.get(a.id) ?? 0) - (lastSeen.get(b.id) ?? 0))
     .map((exercise) => exercise.id)
   const focusPrompts = promptsFor(focus.topic)
-  const exercises = focusIndex === 0
-    ? focusPrompts.slice(0, 3)
-    : [promptsFor(skills[focusIndex - 1].topic)[0], ...focusPrompts.slice(0, 2)]
+  const overdue = review.find((skill) => skill !== focus && (now - skill.lastAt >= 7 * DAY || (skill.misses > 0 && now - skill.lastAt >= 2 * DAY)))
+  const revisit = overdue ?? skills[focusIndex - 1]
+  const exercises = revisit ? [promptsFor(revisit.topic)[0], ...focusPrompts.slice(0, 2)] : focusPrompts.slice(0, 3)
 
   return { id, topic: focus.topic, exercises, step: 0, responses: {}, completedAt: null }
 }

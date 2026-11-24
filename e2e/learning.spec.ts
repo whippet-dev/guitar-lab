@@ -49,6 +49,30 @@ test('opens a lesson independently and gives a hint and a worked answer', async 
   await expect(page.getByRole('heading', { name: 'Find G on the low E string.' })).toBeVisible()
 })
 
+test('compares an interval in two places and builds a complete scale', async ({ page }) => {
+  await page.goto('./#learn/intervals')
+  const intervalLab = page.locator('[aria-label="Interval demonstration"]')
+  await intervalLab.getByRole('button', { name: 'Perfect fifth' }).click()
+  await expect(intervalLab.getByRole('status')).toHaveText('Perfect fifth · 7 semitones')
+  await intervalLab.getByLabel('Starting note').selectOption({ label: 'A' })
+  await expect(intervalLab.getByRole('status')).toHaveText('Perfect fifth · 7 semitones')
+  await expect(intervalLab.locator('.fret-note.target')).toHaveText('E')
+
+  await page.goto('./#learn/scales')
+  const scaleLab = page.locator('[aria-label="Scale builder"]')
+  const semitone = scaleLab.getByRole('button', { name: 'Add 1 fret', exact: true })
+  const tone = scaleLab.getByRole('button', { name: 'Add 2 frets', exact: true })
+  await semitone.click()
+  await expect(scaleLab.getByRole('status')).toContainText('Try the two-fret step')
+  for (const step of [tone, tone, semitone, tone, tone, tone, semitone]) await step.click()
+  await expect(scaleLab.getByRole('status')).toContainText('You’ve built D major.')
+  await expect(scaleLab.getByLabel('Scale notes so far')).toHaveText('DEF♯GABC♯D')
+  await scaleLab.getByRole('button', { name: 'D natural minor', exact: true }).click()
+  await tone.click()
+  await semitone.click()
+  await expect(scaleLab.getByRole('status')).toContainText('You reached F.')
+})
+
 test('explores all fret ranges, scale spellings and intervals with usable controls', async ({ page }) => {
   await page.goto('./#fretboard')
   await expect(page.getByRole('heading', { name: 'Fretboard explorer' })).toBeVisible()

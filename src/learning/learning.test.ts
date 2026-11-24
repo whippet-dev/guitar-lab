@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { EXERCISES, findExercise } from './content'
+import { EXERCISES, TOPICS, findExercise } from './content'
 import { feedbackFor, isCorrect, solutionFor } from './exercise'
 import { advanceSession, EMPTY_PROGRESS, parseProgress, planSession, recordAttempt, saveSessionResponse, topicProgress, type Progress, type Result } from './progress'
 
@@ -37,12 +37,14 @@ describe('daily practice and progress', () => {
     expect(next.exercises).toEqual(['higher-e', 'low-f', 'low-g'])
   })
 
-  it('reinforces an uncertain foundation before progressing', () => {
+  it('keeps an uncertain foundation in the session when introducing the next topic', () => {
     let progress = addAttempt(EMPTY_PROGRESS, 'open-low-e', 'correct', 1)
     progress = addAttempt(progress, 'open-a', 'correct', 2)
     progress = addAttempt(progress, 'higher-e', 'shown', 3)
     expect(topicProgress(progress, 'landmarks').established).toBe(false)
-    expect(planSession(progress, 'review', day).topic).toBe('landmarks')
+    const next = planSession(progress, 'review', day)
+    expect(next.topic).toBe('semitones')
+    expect(EXERCISES.find((exercise) => exercise.id === next.exercises[0])?.topic).toBe('landmarks')
   })
 
   it('uses elapsed time and difficulty to prioritise review after the available progression', () => {
@@ -52,11 +54,29 @@ describe('daily practice and progress', () => {
     progress = addAttempt(progress, 'low-g', 'correct', 3 * day + 1)
     progress = addAttempt(progress, 'octave-g', 'correct', 4 * day)
     progress = addAttempt(progress, 'octave-c', 'correct', 4 * day + 1)
+    for (const topic of TOPICS.slice(3)) {
+      for (const exercise of EXERCISES.filter((item) => item.topic === topic.id).slice(0, 2)) {
+        progress = addAttempt(progress, exercise.id, 'correct', 4 * day + 2)
+      }
+    }
     expect(planSession(progress, 'review', 5 * day).topic).toBe('landmarks')
     progress = addAttempt(progress, 'low-f', 'retry', 5 * day)
     progress = addAttempt(progress, 'b-to-c', 'correct', 5 * day + 1)
     progress = addAttempt(progress, 'open-a', 'correct', 5 * day + 2)
     expect(planSession(progress, 'review', 5 * day + 3).topic).toBe('semitones')
+  })
+
+  it('advances once two distinct prompts are understood and revisits older difficulties alongside the next topic', () => {
+    let progress = addAttempt(EMPTY_PROGRESS, 'open-a', 'correct', day)
+    progress = addAttempt(progress, 'open-a', 'correct', day + 1)
+    expect(planSession(progress, 'repeat', day + 2).topic).toBe('landmarks')
+    progress = addAttempt(progress, 'open-low-e', 'correct', day + 3)
+    progress = addAttempt(progress, 'higher-e', 'retry', day + 4)
+    progress = addAttempt(progress, 'low-f', 'correct', 3 * day)
+    progress = addAttempt(progress, 'low-g', 'correct', 3 * day + 1)
+    const next = planSession(progress, 'next', 4 * day)
+    expect(next.topic).toBe('octaves')
+    expect(next.exercises[0]).toBe('open-a')
   })
 
   it('resumes an exercise and keeps its first result when the learner retries', () => {
