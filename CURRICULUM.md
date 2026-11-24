@@ -18,6 +18,7 @@
 
 - **Interactive demonstration.** Follow a short explanation, select highlighted positions and hear the pitches. An optional detail explains the relationship.
 - **Find a note.** Choose a fret location in the requested area. Exercises can check the note name, an exact pitch or a specific position. Feedback uses the selected string and fret and explains the answer.
+- **Fretboard practice.** In the explorer, find a named note or name a marked position. Keep going at your own pace, with questions drawn from the frets in view.
 - **Practice sequence.** Start with a short demonstration, work through three connected prompts, then take one idea into playing. One prompt revisits a prerequisite and the remaining prompts apply the idea in related positions.
 - **Planned formats.** Match sounds, tap rhythm, build a chord, play a response and reflect on an improvisation task. Each can define prerequisites and feedback independently of its visual input.
 

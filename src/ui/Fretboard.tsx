@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react'
+import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type KeyboardEvent, type Ref } from 'react'
 import { MAX_FRET, noteName, pitchAt, positionName, samePosition, STRINGS, type Position, type StringIndex } from '../music/theory'
 
-type Marker = { label: string; kind?: 'root' }
+type Marker = { label: string; kind?: 'root'; spokenLabel?: string }
+export type FretboardView = { visibleRange: () => readonly [number, number] }
 
 type FretboardProps = {
   range?: readonly [number, number]
@@ -11,16 +12,33 @@ type FretboardProps = {
   guideString?: StringIndex
   reveal?: Position | null
   locked?: boolean
+  label?: string
+  viewRef?: Ref<FretboardView>
 }
 
 const inlays = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
 
-export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, guideString, reveal, locked }: FretboardProps) {
+export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, guideString, reveal, locked, label, viewRef }: FretboardProps) {
   const [first, last] = range
   const frets = Array.from({ length: last - first + 1 }, (_, index) => first + index)
   const [cursor, setCursor] = useState<Position>({ string: guideString ?? 5, fret: first })
   const scroll = useRef<HTMLDivElement>(null)
   const activeFret = Math.max(first, Math.min(last, cursor.fret))
+
+  useImperativeHandle(viewRef, () => ({
+    visibleRange() {
+      const container = scroll.current
+      const row = container?.querySelector('.board-numbers')
+      if (!container || !row?.firstElementChild) return range
+      const left = row.firstElementChild.getBoundingClientRect().right
+      const right = container.getBoundingClientRect().left + container.clientLeft + container.clientWidth
+      const visibleFrets = Array.from(row.children).slice(1).flatMap((cell, index) => {
+        const bounds = cell.getBoundingClientRect()
+        return bounds.left >= left - 0.5 && bounds.right <= right + 0.5 ? [first + index] : []
+      })
+      return visibleFrets.length ? [visibleFrets[0], visibleFrets[visibleFrets.length - 1]] : range
+    },
+  }), [first, range])
 
   useEffect(() => {
     if (reveal) showFret(reveal)
@@ -58,7 +76,7 @@ export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, g
   }
 
   return (
-    <div className="board-scroll" ref={scroll} role="group" aria-label={locked ? 'Guitar fretboard showing the answer.' : 'Guitar fretboard. Use arrow keys to move and Enter or Space to select.'}>
+    <div className="board-scroll" ref={scroll} role="group" aria-label={label ?? (locked ? 'Guitar fretboard showing the answer.' : 'Guitar fretboard. Use arrow keys to move and Enter or Space to select.')}>
       <div className="board-grid" style={{ '--fret-count': frets.length } as CSSProperties}>
         <div className="board-row board-numbers" aria-hidden="true">
           <span className="string-label">Fret</span>
@@ -76,7 +94,7 @@ export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, g
                 return (
                   <button key={fret} type="button" data-position={`${string}-${fret}`}
                     className={`fret-cell${fret === 0 ? ' open-fret' : ''}${pressed ? ' is-selected' : ''}`}
-                    aria-label={`${positionName(position)}${mark ? `, ${mark.label}` : ''}`}
+                    aria-label={mark?.spokenLabel ?? `${positionName(position)}${mark ? `, ${mark.label}` : ''}`}
                     aria-pressed={pressed} aria-disabled={locked || undefined} tabIndex={cursor.string === string && activeFret === fret ? 0 : -1}
                     onFocus={() => setCursor(position)} onKeyDown={(event) => moveFocus(event, position)} onClick={() => { if (!locked) onSelect(position) }}>
                     {mark && <span className={`fret-note ${mark.kind ?? ''}`}>{mark.label}</span>}

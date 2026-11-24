@@ -205,6 +205,19 @@ h1:focus, main:focus { outline: none; }
 .scale-strip span { min-width: 32px; padding: 4px 7px; text-align: center; border-radius: 6px; background: #342941; color: #eadbf8; font-size: .78rem; font-weight: 800; }
 .scale-strip .scale-root { background: var(--accent); color: var(--accent-ink); }
 
+.practice-drills { margin-bottom: 11px; }
+.practice-prompt { margin-bottom: 9px; }
+.practice-prompt h2 { font-size: 1.35rem; }
+.practice-prompt p, .practice-feedback { color: var(--muted); font-size: .875rem; }
+.practice-prompt p { margin-top: 3px; }
+.practice-note-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap: 5px; max-width: 596px; margin-top: 9px; }
+.practice-note-choices .button { padding-inline: 5px; }
+.practice-feedback { min-height: 3.1em; margin-top: 8px; }
+.practice-feedback.is-answered { color: var(--positive); }
+.practice-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 3px; }
+.note-practice .button[aria-disabled] { cursor: default; }
+.practice-actions .button[aria-disabled] { color: var(--dim); background: var(--surface); }
+
 @media (max-width: 770px) {
   .app-shell { --gutter: 20px; }
   .main-content { margin-top: 25px; }
@@ -258,6 +271,7 @@ h1:focus, main:focus { outline: none; }
   .select-controls label { flex: 1 1 auto; min-width: min(100%, 90px); }
   .select-controls select { width: 100%; }
   .segmented { width: 100%; }
+  .segmented button { padding-inline: 7px; }
   .board-scroll { margin-inline: -2px; }
   .explorer-result { min-height: 43px; }
   .practice-topline { margin-top: -5px; }

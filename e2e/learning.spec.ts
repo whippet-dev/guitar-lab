@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { noteName, pitchAt, positionName, STRINGS, type StringIndex } from '../src/music/theory'
 
 test('starts a daily plan, resumes after reload and uses the results to progress', async ({ page }) => {
   await page.goto('./')
@@ -91,6 +92,61 @@ test('explores all fret ranges, scale spellings and intervals with usable contro
   await page.getByRole('combobox', { name: 'Root', exact: true }).selectOption('9')
   await page.getByRole('button', { name: 'Open low E string, 5', exact: true }).click()
   await expect(page.getByText('Open low E string · Perfect fifth', { exact: true })).toBeVisible()
+})
+
+test('practises finding and naming notes without replacing or moving the board', async ({ page }) => {
+  await page.goto('./#fretboard')
+  await page.getByRole('button', { name: 'Practice', exact: true }).click()
+  const practice = page.getByRole('region', { name: 'Fretboard note practice' })
+  const board = practice.locator('.board-scroll')
+  const next = practice.getByRole('button', { name: 'Next note' })
+  const feedback = practice.getByRole('status')
+  const prompt = practice.getByRole('heading', { name: /^Where is / })
+  const firstPrompt = await prompt.textContent()
+  const target = firstPrompt?.match(/^Where is (.+)\?$/)?.[1]
+  expect(target).toBeTruthy()
+
+  await practice.getByRole('button', { name: target === 'E' ? 'Open A string' : 'Open low E string', exact: true }).click()
+  await expect(feedback).toContainText('Try another position')
+  const answer = STRINGS.flatMap((_, index) => Array.from({ length: 6 }, (_, fret) => ({ string: index as StringIndex, fret })))
+    .find((position) => noteName(pitchAt(position), 'common') === target)!
+  await practice.getByRole('button', { name: positionName(answer), exact: true }).click()
+  await expect(feedback).toContainText('That’s it.')
+  await board.evaluate((element) => { element.dataset.retained = 'yes' })
+  await next.scrollIntoViewIfNeeded()
+  const pageTop = await page.evaluate(() => window.scrollY)
+  await next.click()
+  await expect(prompt).not.toHaveText(firstPrompt!)
+  await expect(board).toHaveAttribute('data-retained', 'yes')
+  expect(await page.evaluate(() => window.scrollY)).toBe(pageTop)
+
+  await practice.getByRole('button', { name: 'Name a note' }).click()
+  await page.getByRole('combobox', { name: 'Fret range' }).selectOption({ label: 'All frets (0–24)' })
+  await practice.getByRole('button', { name: 'Name a note' }).click()
+  const scrollLeft = await board.evaluate((element) => { element.scrollLeft = 230; return element.scrollLeft })
+  expect(scrollLeft).toBeGreaterThan(0)
+  await next.click()
+  expect(await board.evaluate((element) => element.scrollLeft)).toBe(scrollLeft)
+  const highlighted = board.getByRole('button', { name: /, highlighted note$/ })
+  expect(await highlighted.evaluate((cell) => {
+    const scroller = cell.closest('.board-scroll')!
+    const { left, right } = cell.getBoundingClientRect()
+    return left >= scroller.getBoundingClientRect().left + 45 && right <= scroller.getBoundingClientRect().right
+  })).toBe(true)
+
+  const [string, fret] = (await highlighted.getAttribute('data-position'))!.split('-').map(Number)
+  await expect(highlighted).toHaveAccessibleName(`String ${string + 1}, ${fret === 0 ? 'open' : `fret ${fret}`}, highlighted note`)
+  const name = noteName(pitchAt({ string: string as StringIndex, fret }), 'common')
+  const choices = practice.getByRole('group', { name: 'Note names' })
+  await choices.getByRole('button', { name: name === 'C' ? 'D' : 'C', exact: true }).click()
+  await expect(feedback).toContainText('Try a different note name')
+  await choices.getByRole('button', { name, exact: true }).click()
+  await expect(feedback).toContainText(`plays ${name}.`)
+  await expect(highlighted).toHaveCount(0)
+  await next.click()
+  await expect(highlighted).toHaveCount(1)
+  await practice.getByRole('button', { name: 'Show answer' }).click()
+  await expect(feedback).toContainText('Here’s the answer.')
 })
 
 test('opens and continues a saved session offline from a Pages-style subpath', async ({ page, context }) => {
