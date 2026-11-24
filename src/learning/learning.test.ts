@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { EXERCISES, TOPICS, findExercise } from './content'
 import { chordSolution, feedbackFor, isChordCorrect, isCorrect, solutionFor } from './exercise'
 import { advanceSession, EMPTY_PROGRESS, parseProgress, planSession, recordAttempt, saveSessionResponse, topicProgress, type Progress, type Result } from './progress'
+import { rhythmDifference } from './rhythm'
 
 const day = 86_400_000
 
@@ -22,6 +23,11 @@ describe('exercise content and feedback', () => {
     expect(isChordCorrect(exercise, positions)).toBe(true)
     expect(isChordCorrect(exercise, [...positions].reverse())).toBe(true)
     expect(isChordCorrect(exercise, [exercise.root, positions[0]])).toBe(false)
+  })
+
+  it('checks rhythm slots independent of tap order and catches a misplaced first beat', () => {
+    expect(rhythmDifference([0, 2, 4, 6], [6, 2, 0, 4])).toEqual({ missing: undefined, extra: undefined })
+    expect(rhythmDifference([0, 2, 4, 6], [1, 2, 4, 6])).toEqual({ missing: 0, extra: 1 })
   })
 
   it('distinguishes the required string, note name and exact octave', () => {

@@ -43,7 +43,10 @@ export function ProgressionLab() {
         <small>{numeral}</small><strong>{rootName}{kind === 'minor' ? 'm' : ''}</strong>
       </button>)}
     </div>
-    <p className="lab-instruction">Lavender outlines mark the current chord tones. The quieter notes are the rest of the key.</p>
+    <div className="lab-result">
+      <p className="lab-instruction">Lavender outlines mark the current chord tones.</p>
+      <AudioButton pitches={chord.pitches} together label="Hear this chord" />
+    </div>
     <Fretboard range={ranges} selected={selected} onSelect={setSelected} marker={(position) => {
       const midi = pitchAt(position)
       const pc = pitchClass(midi)
@@ -57,8 +60,7 @@ export function ProgressionLab() {
         : selectedRole >= 0 ? `${chord.notes[selectedRole].name} is the ${roleNames[selectedRole]} of this chord.`
         : keyNote ? `${keyNote.name} is in the key, outside this chord. Try moving from it to a marked chord tone.`
         : `${noteName(selectedPitch, 'common')} is outside this key. Hear the tension, then try a nearby note in the key.`}</p>
-      <AudioButton pitches={selectedPitch === undefined ? chord.pitches : [...chord.pitches, selectedPitch]} together
-        label={selectedPitch === undefined ? 'Hear this chord' : 'Hear your note with the chord'} />
+      {selectedPitch !== undefined && <AudioButton pitches={[...chord.pitches, selectedPitch]} together label="Hear your note with the chord" />}
     </div>
   </div>
 }

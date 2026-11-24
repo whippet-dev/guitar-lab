@@ -13,9 +13,9 @@ The app connects sounds, note names and fretboard shapes, then puts them to work
 - Use readable text, clear focus, meaningful labels and comfortable touch targets. Keep accessibility work focused on making the app usable in everyday practice.
 - Keep progress descriptive, private to the device and useful for choosing what to revisit. Keep practice free of gamification, including XP, coins, rankings, artificial rewards, lives and streak pressure.
 
-## Initial release
+## Current learning areas
 
-The current release teaches open strings, semitone steps and the 12th fret. It includes a daily practice flow, interactive lessons, a fretboard explorer with audio, local progress and offline use. Over time, the curriculum also covers scales, intervals, chord theory, rhythm, ear training and practical musicianship. See the [curriculum](CURRICULUM.md).
+Learn the neck, compare intervals, build scales and chords, follow a progression, match sounds and place a phrase in time. Daily practice connects these ideas. The explorer and individual lessons are also available on their own, with audio, local progress and offline use. See the [curriculum](CURRICULUM.md).
 
 ## Working on the project
 

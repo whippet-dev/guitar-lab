@@ -27,22 +27,22 @@ export function TriadLab() {
         {chordRoots.map((pitch) => <option value={pitch} key={pitch}>{noteName(pitch)}</option>)}
       </select></label>
       <label className="lab-select">Third<select value={third} onChange={(event) => { setThird(Number(event.target.value)); setSelected(null) }}>
-        <option value={3}>Minor · 3 frets</option><option value={4}>Major · 4 frets</option>
+        <option value={3}>Minor · 3</option><option value={4}>Major · 4</option>
       </select></label>
       <label className="lab-select">Fifth<select value={fifth} onChange={(event) => { setFifth(Number(event.target.value)); setSelected(null) }}>
-        <option value={6}>Lowered · 6 frets</option><option value={7}>Perfect · 7 frets</option><option value={8}>Raised · 8 frets</option>
+        <option value={6}>Lowered · 6</option><option value={7}>Perfect · 7</option><option value={8}>Raised · 8</option>
       </select></label>
     </div>
     <div className="lab-chord" aria-label="Chord notes">
       {notes.map(({ degree, name }) => <span key={degree}><strong>{name}</strong>{degree === 1 ? 'Root' : degree === 3 ? 'Third' : 'Fifth'}</span>)}
     </div>
+    <div className="lab-choices"><AudioButton pitches={pitches} together label="Hear the chord" /><AudioButton pitches={pitches} label="Hear notes separately" /></div>
     <Fretboard range={fretRange} selected={selected} onSelect={setSelected} marker={(position) => {
       const note = notes.find(({ pitch }) => pitch === pitchClass(pitchAt(position)))
       return note ? { label: note.name, kind: note.degree === 1 ? 'root' : undefined } : undefined
     }} />
     <div className="lab-result">
       <p role="status"><strong>{chord}</strong>{selected && (active ? ` · ${active.name} is the ${active.degree === 1 ? 'root' : active.degree === 3 ? 'third' : 'fifth'}.` : ` · ${noteName(pitchAt(selected), 'common')} sits outside the chord.`)}</p>
-      <div className="lab-choices"><AudioButton pitches={pitches} together label="Hear the chord" /><AudioButton pitches={pitches} label="Hear notes separately" /></div>
     </div>
   </div>
 }

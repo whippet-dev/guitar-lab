@@ -1,7 +1,7 @@
 import type { PositionExercise, Topic } from './content'
 
 export const LISTENING_TOPIC: Topic = {
-  id: 'listening', group: 'Listening', title: 'Hear the next note before you play it',
+  id: 'listening', group: 'Listening and timing', title: 'Hear the next note before you play it',
   description: 'Listen, hum the target and find it on the fretboard.',
   intro: 'Listen to A and C a couple of times. Hum the second note back before you reach for it. Then try the exercises with the second note hidden. If your first guess sounds different, listen to the two pitches side by side and adjust.',
   detail: 'You can hear a jump as a distance from a starting note. The distance from A to C is three semitones, a minor third. Singing or humming the target gives you something to compare with the notes you find on the guitar.',

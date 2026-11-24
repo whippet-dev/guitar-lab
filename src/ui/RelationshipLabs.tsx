@@ -48,12 +48,12 @@ export function IntervalLab() {
           onClick={() => { setDistance(choice); setSelected(undefined); setMessage('') }}>{intervalName(choice)}</button>)}
       </div>
     </div>
+    <AudioButton pitches={[rootPitch, target]} label="Hear the interval" />
     <Fretboard range={intervalRange} selected={note} reveal={note} onSelect={pick}
       marker={(position) => samePosition(root, position) ? { label: noteName(rootPitch), kind: 'root' }
         : samePosition(note, position) ? { label: spellDegree(rootPitch, intervalDegrees[distance], distance).name, kind: 'target' } : undefined} />
     <div className="lab-result">
       <p role="status">{message || <><strong>{intervalName(distance)}</strong> · {distance} {distance === 1 ? 'semitone' : 'semitones'}</>}</p>
-      <AudioButton pitches={[rootPitch, target]} label="Hear the interval" />
     </div>
   </div>
 }

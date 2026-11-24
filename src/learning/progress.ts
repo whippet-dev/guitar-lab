@@ -5,7 +5,8 @@ export type Result = 'correct' | 'retry' | 'shown'
 export type Attempt = { id: string; exercise: string; result: Result; at: number }
 export type PositionResponse = { result: Result; position: Position }
 export type ChordResponse = { result: Result; positions: Position[] }
-export type Response = PositionResponse | ChordResponse
+export type RhythmResponse = { result: Result; slots: number[] }
+export type Response = PositionResponse | ChordResponse | RhythmResponse
 
 export type Session = {
   id: string
@@ -109,7 +110,8 @@ function isPosition(value: unknown): value is Position {
 
 function isResponse(value: unknown): value is Response {
   return record(value) && isResult(value.result) && (isPosition(value.position) ||
-    (Array.isArray(value.positions) && value.positions.length === 2 && value.positions.every(isPosition)))
+    (Array.isArray(value.positions) && value.positions.length === 2 && value.positions.every(isPosition)) ||
+    (Array.isArray(value.slots) && new Set(value.slots).size === value.slots.length && value.slots.every((slot) => Number.isInteger(slot) && slot >= 0 && slot < 8)))
 }
 
 function isAttempt(value: unknown): value is Attempt {
@@ -127,7 +129,7 @@ function isSession(value: unknown): value is Session {
   return typeof value.step === 'number' && Number.isInteger(value.step) && value.step >= 0 && value.step <= value.exercises.length + 1 &&
     record(value.responses) && Object.entries(value.responses).every(([id, response]) => {
       const exercise = findExercise(id)
-      return exercise && isResponse(response) && (exercise.kind === 'chord' ? 'positions' in response : 'position' in response)
+      return exercise && isResponse(response) && (exercise.kind === 'chord' ? 'positions' in response : exercise.kind === 'rhythm' ? 'slots' in response : 'position' in response)
     }) &&
     (value.completedAt === null || (typeof value.completedAt === 'number' && Number.isFinite(value.completedAt)))
 }

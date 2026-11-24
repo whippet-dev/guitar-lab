@@ -3,19 +3,20 @@ import type { TriadKind } from '../music/harmony'
 import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
 import { LISTENING_EXERCISES, LISTENING_TOPIC } from './listening'
+import { RHYTHM_EXERCISES, RHYTHM_TOPIC } from './rhythm'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm'
 
 export type Topic = {
   id: TopicId
-  group?: 'Scales and intervals' | 'Harmony in action' | 'Listening'
+  group?: 'Scales and intervals' | 'Harmony in action' | 'Listening and timing'
   title: string
   description: string
   intro: string
   detail: string
   task: string
   taskPositions: readonly Position[]
-} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' })
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -48,6 +49,7 @@ export const TOPICS: readonly Topic[] = [
   ...RELATIONSHIP_TOPICS,
   ...HARMONY_TOPICS,
   LISTENING_TOPIC,
+  RHYTHM_TOPIC,
 ]
 
 type Answer =
@@ -62,12 +64,12 @@ type ExercisePrompt = {
   prompt: string
   hint: string
   why: string
-  range: [number, number]
 }
 
-export type PositionExercise = ExercisePrompt & { kind?: undefined; string?: StringIndex; anchor?: Position; listen?: readonly [Position, Position]; answer: Answer }
-export type ChordExercise = ExercisePrompt & { kind: 'chord'; root: Position; quality: TriadKind }
-export type Exercise = PositionExercise | ChordExercise
+export type PositionExercise = ExercisePrompt & { kind?: undefined; range: [number, number]; string?: StringIndex; anchor?: Position; listen?: readonly [Position, Position]; answer: Answer }
+export type ChordExercise = ExercisePrompt & { kind: 'chord'; range: [number, number]; root: Position; quality: TriadKind }
+export type RhythmExercise = ExercisePrompt & { kind: 'rhythm'; slots: readonly number[] }
+export type Exercise = PositionExercise | ChordExercise | RhythmExercise
 
 export const EXERCISES: readonly Exercise[] = [
   {
@@ -127,6 +129,7 @@ export const EXERCISES: readonly Exercise[] = [
   ...RELATIONSHIP_EXERCISES,
   ...HARMONY_EXERCISES,
   ...LISTENING_EXERCISES,
+  ...RHYTHM_EXERCISES,
 ]
 
 export function findTopic(id: string) {

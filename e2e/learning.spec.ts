@@ -116,6 +116,21 @@ test('compares a listening guess with the target and offers a silent hint', asyn
   await expect(page.getByText('You’ve heard and found a minor third.', { exact: false })).toBeVisible()
 })
 
+test('plays an editable bar and checks notes against the beat', async ({ page }) => {
+  await page.goto('./#learn/rhythm')
+  const board = page.locator('[aria-label="Rhythm board"]')
+  await board.getByRole('button', { name: 'Between the beats' }).click()
+  await expect(board.getByRole('button', { name: 'beat 1', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await board.getByRole('button', { name: 'Play the bar' }).click()
+  await expect(board.locator('.is-current')).toHaveCount(1)
+  await page.getByRole('link', { name: 'Try an exercise' }).click()
+  await board.getByRole('button', { name: 'Check pattern' }).click()
+  await expect(board.getByRole('status')).toHaveText('Add a note on beat 1.')
+  for (const beat of [1, 2, 3, 4]) await board.getByRole('button', { name: `beat ${beat}`, exact: true }).click()
+  await board.getByRole('button', { name: 'Check pattern' }).click()
+  await expect(board.getByRole('status')).toContainText('Each note lands with a click')
+})
+
 test('explores all fret ranges, scale spellings and intervals with usable controls', async ({ page }) => {
   await page.goto('./#fretboard')
   await expect(page.getByRole('heading', { name: 'Fretboard explorer' })).toBeVisible()

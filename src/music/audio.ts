@@ -4,7 +4,7 @@ let context: AudioContext | undefined
 let playing: OscillatorNode[] = []
 let playback = 0
 
-export async function playGroups(groups: readonly (readonly number[])[], gap = 0.62) {
+export async function playGroups(groups: readonly (readonly number[])[], gap = 0.62, duration = 0.8) {
   const request = ++playback
   context ??= new AudioContext()
   if (context.state !== 'running') await context.resume()
@@ -23,7 +23,7 @@ export async function playGroups(groups: readonly (readonly number[])[], gap = 0
       oscillator.frequency.value = frequencyOf(pitch)
       envelope.gain.setValueAtTime(0.001, time)
       envelope.gain.exponentialRampToValueAtTime(0.18 / pitches.length, time + 0.015)
-      envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.8)
+      envelope.gain.exponentialRampToValueAtTime(0.001, time + duration)
       oscillator.connect(envelope).connect(audio.destination)
       oscillator.onended = () => {
         oscillator.disconnect()
@@ -32,7 +32,7 @@ export async function playGroups(groups: readonly (readonly number[])[], gap = 0
       }
       playing.push(oscillator)
       oscillator.start(time)
-      oscillator.stop(time + 0.82)
+      oscillator.stop(time + duration + 0.02)
     })
   })
 }

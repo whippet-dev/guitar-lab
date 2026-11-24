@@ -9,6 +9,7 @@ import { AudioButton } from './AudioButton'
 import { IntervalLab, ScaleLab } from './RelationshipLabs'
 import { ChordCheck, TriadLab } from './HarmonyLabs'
 import { ProgressionLab } from './ProgressionLab'
+import { RhythmLab } from './RhythmLab'
 
 function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Position] }> }) {
   const [selected, setSelected] = useState<Position | null>(null)
@@ -45,6 +46,7 @@ export function LessonBody({ topic }: { topic: Topic }) {
     {topic.activity === 'scales' && <ScaleLab />}
     {topic.activity === 'triads' && <TriadLab />}
     {topic.activity === 'changes' && <ProgressionLab />}
+    {topic.activity === 'rhythm' && <RhythmLab />}
     <details className="explanation">
         <summary><CircleHelp size={17} /> Why does this work?</summary>
         <p>{topic.detail}</p>
@@ -55,8 +57,15 @@ export function LessonBody({ topic }: { topic: Topic }) {
 export function ExerciseBody({ exercise, response, onResponse }: {
   exercise: Exercise; response?: Response; onResponse: (response: Response) => void;
 }) {
+  if (exercise.kind === 'rhythm') return <RhythmLab check={{ exercise, response: response && 'slots' in response ? response : undefined, onResponse }} />
   return exercise.kind === 'chord' ? <ChordCheck exercise={exercise} response={response && 'positions' in response ? response : undefined} onResponse={onResponse} />
     : <PositionCheck exercise={exercise} response={response && 'position' in response ? response : undefined} onResponse={onResponse} />
+}
+
+function exerciseLabel(exercise: Exercise) {
+  if (exercise.kind === 'rhythm') return 'Place the rhythm'
+  if (exercise.kind === 'chord') return 'Build a chord'
+  return exercise.listen ? 'Listen and match' : 'Find a note'
 }
 
 function PositionCheck({ exercise, response, onResponse }: {
@@ -154,7 +163,7 @@ export function ExerciseView({ exercise, onAttempt }: { exercise: Exercise; onAt
     <div className="learning-layout">
       <a className="back-link" href={`#learn/${exercise.topic}`}><ArrowLeft size={16} /> Back to lesson</a>
       <section className="panel lesson-panel">
-        <div className="eyebrow"><ListMusic size={17} /> {exercise.kind === 'chord' ? 'Build a chord' : exercise.listen ? 'Listen and match' : 'Note identification'}</div>
+        <div className="eyebrow"><ListMusic size={17} /> {exerciseLabel(exercise)}</div>
         <h1 tabIndex={-1}>{exercise.prompt}</h1>
         <ExerciseBody exercise={exercise} response={response} onResponse={(answer) => { if (!response) onAttempt(answer); setResponse(answer) }} />
         {response && response.result !== 'retry' && <div className="learning-actions">
@@ -195,7 +204,7 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
       </div>
       {!completed && <progress className="session-progress" aria-label="Daily practice progress" value={session.step + 1} max={total} />}
       <section className="panel lesson-panel">
-        <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? (exercise.kind === 'chord' ? 'Build a chord' : exercise.listen ? 'Listen and match' : 'Find a note') : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
+        <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? exerciseLabel(exercise) : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
         <h1 tabIndex={-1} ref={heading}>{title}</h1>
         {completed ? <>
           <p className="teaching-copy">You worked on {topic.title.toLowerCase()}. Your answers will help choose what to revisit in your next session.</p>
