@@ -3,7 +3,7 @@ import type { TriadKind } from '../music/harmony'
 import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes'
 
 export type Topic = {
   id: TopicId
@@ -14,7 +14,7 @@ export type Topic = {
   detail: string
   task: string
   taskPositions: readonly Position[]
-} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' })
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -51,6 +51,7 @@ export const TOPICS: readonly Topic[] = [
 type Answer =
   | { kind: 'position'; position: Position }
   | { kind: 'note'; pitchClass: number }
+  | { kind: 'tones'; pitchClasses: readonly number[] }
   | { kind: 'pitch'; midi: number }
 
 type ExercisePrompt = {

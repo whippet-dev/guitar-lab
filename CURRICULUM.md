@@ -9,7 +9,7 @@
 | Scales | Build major and natural minor one gap at a time | Compare parallel scales and hear the change in the third | Guided lesson and practice |
 | Pentatonics | Major and minor pentatonic, position connections and root locations | Move a phrase between positions | Explorer preview |
 | Chords | Build major, minor, diminished and augmented triads from thirds and fifths | Hear how moving one note changes the chord and find chord tones on the neck | Guided lesson and practice |
-| Keys | Diatonic chords, tonic and scales that fit a progression | Target chord tones over a progression | Planned |
+| Keys and changes | Compare chords made from one major scale, using key and progression controls | Test the same melody note against changing chords | Guided lesson and practice |
 | CAGED | Five movable shapes, roots and overlapping positions | Connect rhythm and lead playing in a familiar key | Planned |
 | Rhythm and listening | Pulse, subdivisions, interval recognition and call and response | Play with intention and hear the sound before reaching for it | Planned throughout |
 | Practical lead | Motifs, phrasing, space and resolving notes | Improvise over simple changes | Planned |

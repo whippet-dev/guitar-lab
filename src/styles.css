@@ -142,6 +142,10 @@ h1:focus, main:focus { outline: none; }
 .lab-chord { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 364px; }
 .lab-chord span { display: grid; justify-items: center; padding: 6px 3px; border-radius: 8px; border: 1px solid var(--border); background: #211b2e; color: var(--muted); font-size: .72rem; }
 .lab-chord strong { color: var(--accent); font-size: 1.02rem; }
+.lab-progression { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 440px; }
+.lab-progression .button { display: grid; gap: 1px; padding-inline: 4px; }
+.lab-progression small { color: var(--muted); font-size: .7rem; }
+.lab-progression strong { font-size: 1rem; }
 .audio-control { display: inline-flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 .muted { color: var(--muted); font-size: .85rem; }
 .explanation { border-top: 1px solid var(--border); margin-top: 15px; padding-top: 3px; }

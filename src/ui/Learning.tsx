@@ -8,6 +8,7 @@ import { Fretboard, noteMarker } from './Fretboard'
 import { AudioButton } from './AudioButton'
 import { IntervalLab, ScaleLab } from './RelationshipLabs'
 import { ChordCheck, TriadLab } from './HarmonyLabs'
+import { ProgressionLab } from './ProgressionLab'
 
 function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Position] }> }) {
   const [selected, setSelected] = useState<Position | null>(null)
@@ -43,6 +44,7 @@ export function LessonBody({ topic }: { topic: Topic }) {
     {topic.activity === 'intervals' && <IntervalLab />}
     {topic.activity === 'scales' && <ScaleLab />}
     {topic.activity === 'triads' && <TriadLab />}
+    {topic.activity === 'changes' && <ProgressionLab />}
     <details className="explanation">
         <summary><CircleHelp size={17} /> Why does this work?</summary>
         <p>{topic.detail}</p>

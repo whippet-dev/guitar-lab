@@ -7,6 +7,7 @@ export function isCorrect(exercise: PositionExercise, position: Position) {
   const midi = pitchAt(position)
   const answer = exercise.answer
   if (answer.kind === 'position') return samePosition(answer.position, position)
+  if (answer.kind === 'tones') return answer.pitchClasses.includes(pitchClass(midi))
   return answer.kind === 'note' ? pitchClass(midi) === answer.pitchClass : midi === answer.midi
 }
 
@@ -27,6 +28,7 @@ export function feedbackFor(exercise: PositionExercise, position: Position) {
   if (exercise.string !== undefined && position.string !== exercise.string) {
     return `You found ${pitch} at ${location.toLowerCase()}. Try again on the ${STRINGS[exercise.string].name} string.`
   }
+  if (exercise.answer.kind === 'tones') return `That’s ${pitch}. ${exercise.hint}`
   if (exercise.anchor) {
     const distance = pitchAt(position) - pitchAt(exercise.anchor)
     if (distance === 0) return 'That’s the starting pitch. Try the note that completes the relationship.'

@@ -92,6 +92,19 @@ test('changes a chord’s quality and builds a triad on the board', async ({ pag
   await expect(page.getByRole('link', { name: 'Next exercise' })).toBeVisible()
 })
 
+test('keeps the same lead note selected as the chord changes', async ({ page }) => {
+  await page.goto('./#learn/changes')
+  const workshop = page.locator('[aria-label="Chord changes workshop"]')
+  const e = workshop.getByRole('button', { name: 'D string, fret 2, E', exact: true })
+  await e.click()
+  await expect(workshop.getByRole('status')).toContainText('E is the third of this chord.')
+  await workshop.getByRole('button', { name: 'F major, chord 2' }).click()
+  await expect(e).toHaveAttribute('aria-pressed', 'true')
+  await expect(workshop.getByRole('status')).toContainText('E is in the key, outside this chord.')
+  await workshop.getByRole('combobox', { name: 'Key', exact: true }).selectOption({ label: 'G major' })
+  await expect(workshop.getByRole('button', { name: 'C major, chord 2' })).toBeVisible()
+})
+
 test('explores all fret ranges, scale spellings and intervals with usable controls', async ({ page }) => {
   await page.goto('./#fretboard')
   await expect(page.getByRole('heading', { name: 'Fretboard explorer' })).toBeVisible()
