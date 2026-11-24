@@ -11,10 +11,13 @@ export const STRINGS = [
 
 export type StringIndex = 0 | 1 | 2 | 3 | 4 | 5
 export type Position = { string: StringIndex; fret: number }
-export type Spelling = 'sharps' | 'flats'
+export type Spelling = 'common' | 'sharps' | 'flats'
 
-const sharpNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
-const flatNames = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B']
+const noteNames: Record<Spelling, readonly string[]> = {
+  common: ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'],
+  sharps: ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'],
+  flats: ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'],
+}
 const letters = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
 const naturalPitches = [0, 2, 4, 5, 7, 9, 11]
 
@@ -23,7 +26,7 @@ export function pitchClass(semitones: number) {
 }
 
 export function noteName(semitones: number, spelling: Spelling = 'sharps') {
-  return (spelling === 'flats' ? flatNames : sharpNames)[pitchClass(semitones)]
+  return noteNames[spelling][pitchClass(semitones)]
 }
 
 export function samePosition(a: Position | null | undefined, b: Position) {

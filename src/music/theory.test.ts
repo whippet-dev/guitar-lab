@@ -49,6 +49,13 @@ describe('note spelling, intervals and scales', () => {
     expect(scaleNotes(9, 'minor').map(({ name }) => name)).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G'])
   })
 
+  it('mixes common sharps and flats while preserving the spelling of each scale', () => {
+    expect(noteName(54, 'common')).toBe('F♯')
+    expect(noteName(58, 'common')).toBe('B♭')
+    expect(scaleNotes(6, 'major', 'common').map(({ name }) => name)).toEqual(['F♯', 'G♯', 'A♯', 'B', 'C♯', 'D♯', 'E♯'])
+    expect(scaleNotes(10, 'major', 'common').map(({ name }) => name)).toEqual(['B♭', 'C', 'D', 'E♭', 'F', 'G', 'A'])
+  })
+
   it('places each pentatonic note at its correct degree and transposes every scale', () => {
     expect(scaleNotes(9, 'minorPentatonic').map(({ name }) => name)).toEqual(['A', 'C', 'D', 'E', 'G'])
     expect(scaleNotes(0, 'majorPentatonic').map(({ degree }) => degree)).toEqual([1, 2, 3, 5, 6])

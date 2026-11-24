@@ -4,7 +4,7 @@ Keep the code readable. Add features and abstractions when they support a curren
 
 ## Application boundaries
 
-- `src/music/theory.ts` is the pure music model. It uses MIDI semitone numbers for absolute pitch and pitch classes for recurring note names. String indices run from thinnest to thickest in the visual fretboard. Fret zero is open and each fret adds one semitone. Scale spelling uses diatonic letter offsets, while chromatic note displays can prefer sharps or flats.
+- `src/music/theory.ts` is the pure music model. It uses MIDI semitone numbers for absolute pitch and pitch classes for recurring note names. String indices run from thinnest to thickest in the visual fretboard. Fret zero is open and each fret adds one semitone. Chromatic notes can use common names, sharps or flats. Scales follow the letter pattern of their chosen root.
 - `src/learning` contains the authored lessons and prompts, answer evaluation, sequencing, and versioned progress model. A session saves stable identifiers and the active step, so it can resume after a refresh or offline. First results are recorded once per attempt even when the learner retries.
 - `src/ui` contains the reusable fretboard and the lesson, practice and exploration views. The explorer and exercise views read the same pitch model. The fretboard uses touch-sized buttons, horizontal scrolling, range jumps, and a single keyboard tab stop with arrow navigation.
 - `src/music/audio.ts` plays notes through Web Audio when the learner starts playback. Microphone or audio-interface input is a future possibility.
