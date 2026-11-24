@@ -54,10 +54,10 @@ export function FretboardPractice({ range, spelling }: { range: readonly [number
 
   function marker(position: Position) {
     if (!askingForPosition && !answered && samePosition(question, position)) {
-      return { label: '?', kind: 'root' as const, spokenLabel: `${drillLocation(position)}, highlighted note` }
+      return { label: '?', kind: 'target' as const, spokenLabel: `${drillLocation(position)}, highlighted note` }
     }
     if (feedback && samePosition(feedback.position, position) && (askingForPosition || answered)) {
-      return { label: noteName(pitchAt(position), spelling), kind: answered ? 'root' as const : undefined }
+      return { label: noteName(pitchAt(position), spelling), kind: answered ? 'target' as const : undefined }
     }
   }
 

@@ -71,6 +71,9 @@ test('explores all fret ranges, scale spellings and intervals with usable contro
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(await page.evaluate(() => document.documentElement.clientWidth))
 
   await fretRange.selectOption({ label: 'All frets (0–24)' })
+  const fretWidths = await page.locator('.board-fret:not(.board-nut)').evaluateAll((frets) => frets.map((fret) => fret.getBoundingClientRect().width))
+  expect(fretWidths).toHaveLength(24)
+  expect(fretWidths.slice(1).every((width, index) => width >= 44 && width < fretWidths[index])).toBe(true)
   const lowE = page.getByRole('button', { name: 'Open low E string, E', exact: true })
   await lowE.focus()
   await page.keyboard.press('End')
@@ -130,8 +133,9 @@ test('practises finding and naming notes without replacing or moving the board',
   const highlighted = board.getByRole('button', { name: /, highlighted note$/ })
   expect(await highlighted.evaluate((cell) => {
     const scroller = cell.closest('.board-scroll')!
+    const labels = scroller.querySelector('.board-numbers .string-label')!
     const { left, right } = cell.getBoundingClientRect()
-    return left >= scroller.getBoundingClientRect().left + 45 && right <= scroller.getBoundingClientRect().right
+    return left >= labels.getBoundingClientRect().right - 0.5 && right <= scroller.getBoundingClientRect().right
   })).toBe(true)
 
   const [string, fret] = (await highlighted.getAttribute('data-position'))!.split('-').map(Number)

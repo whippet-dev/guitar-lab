@@ -61,7 +61,7 @@ export function Explorer() {
           </div>
         </div>
         {mode === 'Practice' ? <FretboardPractice key={range} range={RANGES[range]} spelling={spelling} /> : <>
-          {mode === 'Scales' && <p className="explorer-guide">A <strong>scale</strong> is a set of notes arranged from low to high. The <strong>root</strong> is its home note, highlighted in light purple. Choose a <strong>scale</strong> to change which notes light up. Major and natural minor use seven notes. Pentatonic scales use five.</p>}
+          {mode === 'Scales' && <p className="explorer-guide">A <strong>scale</strong> is a set of notes arranged from low to high. The <strong>root</strong> is its home note, marked with a lavender outline. Choose a <strong>scale</strong> to change which notes light up. Major and natural minor use seven notes. Pentatonic scales use five.</p>}
           {mode === 'Intervals' && <p className="explorer-guide">An <strong>interval</strong> is the distance between two notes. Choose a <strong>root</strong> as your starting note, shown as 1. Tap another position to see its interval from {rootName} within one octave.</p>}
           <div className="board-caption"><span>Standard tuning</span><span>E A D G B E</span></div>
           <Fretboard key={range} range={RANGES[range]} selected={selected} onSelect={setSelected} marker={marker} />

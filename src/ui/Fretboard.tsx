@@ -1,7 +1,7 @@
 import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type KeyboardEvent, type Ref } from 'react'
 import { MAX_FRET, noteName, pitchAt, positionName, samePosition, STRINGS, type Position, type StringIndex } from '../music/theory'
 
-type Marker = { label: string; kind?: 'root'; spokenLabel?: string }
+type Marker = { label: string; kind?: 'root' | 'target'; spokenLabel?: string }
 export type FretboardView = { visibleRange: () => readonly [number, number] }
 
 type FretboardProps = {
@@ -17,13 +17,23 @@ type FretboardProps = {
 }
 
 const inlays = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
-const stringGauges = [1.15, 1.45, 1.8, 2.2, 2.9, 3.6]
+const stringGauges = [1, 1.12, 1.28, 1.5, 1.8, 2.12]
 
 export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, guideString, reveal, locked, label, viewRef }: FretboardProps) {
   const [first, last] = range
   const frets = Array.from({ length: last - first + 1 }, (_, index) => first + index)
-  // Frets get closer together up the neck, with a minimum width for tapping.
-  const columns = frets.map((fret) => `minmax(var(--fret-width), ${fret === 0 ? 0.78 : 2 ** (-(fret - 1) / 12)}fr)`).join(' ')
+  const firstFretted = Math.max(1, first)
+  // Each fret gap follows the same equal-tempered ratio as the remaining string length.
+  // Keep the taper above a touch-sized floor, even when the whole neck scrolls.
+  const smallestGap = 2 ** ((firstFretted - last) / 12)
+  let totalTaper = 0
+  const columns = frets.map((fret) => {
+    if (fret === 0) return 'minmax(var(--fret-width), 0.6fr)'
+    const gap = 2 ** ((firstFretted - fret) / 12)
+    const taper = gap - smallestGap
+    totalTaper += taper
+    return `minmax(calc(var(--fret-width) + var(--fret-taper) * ${taper}), ${gap}fr)`
+  }).join(' ')
   const [cursor, setCursor] = useState<Position>({ string: guideString ?? 5, fret: first })
   const scroll = useRef<HTMLDivElement>(null)
   const fretLabel = useRef<HTMLSpanElement>(null)
@@ -82,7 +92,7 @@ export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, g
 
   return (
     <div className="board-scroll" ref={scroll} role="group" aria-label={label ?? (locked ? 'Guitar fretboard showing the answer.' : 'Guitar fretboard. Use arrow keys to move and Enter or Space to select.')}>
-      <div className="board-grid" style={{ '--fret-count': frets.length, '--fret-columns': columns } as CSSProperties}>
+      <div className={`board-grid${frets.length > 7 ? ' board-grid-wide' : ''}`} style={{ '--fret-count': frets.length, '--fret-columns': columns, '--total-taper': totalTaper } as CSSProperties}>
         <div className="board-row board-numbers" aria-hidden="true">
           <span className="string-label" ref={fretLabel}>Fret</span>
           {frets.map((fret) => <span key={fret} className={fret === 12 || fret === 24 ? 'octave-fret' : ''}>{fret}</span>)}
@@ -97,7 +107,7 @@ export function Fretboard({ range = [0, MAX_FRET], selected, marker, onSelect, g
           {STRINGS.map(({ name }, index) => {
             const string = index as StringIndex
             return (
-              <div className={`board-row board-string${index >= 3 ? ' board-wound' : ''}${string === guideString ? ' board-guide' : ''}`} key={name} style={{ '--string-width': `${stringGauges[index]}px` } as CSSProperties}>
+              <div className={`board-row board-string${string === guideString ? ' board-guide' : ''}`} key={name} style={{ '--string-width': `${stringGauges[index]}px` } as CSSProperties}>
                 <span className="string-label" aria-hidden="true">{name === 'high E' ? 'e' : name === 'low E' ? 'E' : name}</span>
                 {frets.map((fret) => {
                   const position = { string, fret }
