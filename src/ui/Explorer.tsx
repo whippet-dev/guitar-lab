@@ -40,7 +40,7 @@ export function Explorer() {
         <h1 tabIndex={-1}>Fretboard explorer</h1>
         <p>See how notes, scales and intervals fit together across the neck.</p>
       </div>
-      <section className="panel explorer-panel" aria-label="Explore the guitar neck">
+      <section className={`panel explorer-panel${mode === 'Practice' ? ' is-practising' : ''}`} aria-label="Explore the guitar neck">
         <div className="explorer-controls">
           <div className="segmented" role="group" aria-label="Fretboard display">
             {MODES.map((option) => <button key={option} type="button" aria-pressed={mode === option} onClick={() => setMode(option)}>{option}</button>)}

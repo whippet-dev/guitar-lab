@@ -149,6 +149,54 @@ test('practises finding and naming notes without replacing or moving the board',
   await expect(feedback).toContainText('Here’s the answer.')
 })
 
+test('keeps practice controls and the guitar neck visible in landscape', async ({ page }) => {
+  await page.goto('./#fretboard')
+  await page.getByRole('button', { name: 'Practice', exact: true }).click()
+  const practice = page.getByRole('region', { name: 'Fretboard note practice' })
+  await practice.getByRole('button', { name: 'Name a note' }).click()
+  const board = practice.locator('.board-scroll')
+  await board.evaluate((element) => { element.dataset.retained = 'yes' })
+  const elements = [
+    page.getByRole('combobox', { name: 'Fret range' }), page.getByRole('combobox', { name: 'Note names', exact: true }),
+    board, practice.getByRole('group', { name: 'Practice type' }), practice.getByRole('heading'),
+    practice.getByRole('group', { name: 'Note names' }), practice.getByRole('status'),
+    practice.getByRole('button', { name: 'Show answer' }), practice.getByRole('button', { name: 'Next note' }),
+  ]
+
+  for (const { width, height, side, bottom } of [
+    { width: 844, height: 390, side: 47, bottom: 21 },
+    { width: 750, height: 340, side: 0, bottom: 0 },
+    { width: 568, height: 320, side: 0, bottom: 0 },
+  ]) {
+    await page.setViewportSize({ width, height })
+    await page.locator('.app-shell').evaluate((shell, insets) => {
+      shell.style.setProperty('--practice-inset-left', `${insets.side}px`)
+      shell.style.setProperty('--practice-inset-right', `${insets.side}px`)
+      shell.style.setProperty('--practice-inset-bottom', `${insets.bottom}px`)
+    }, { side, bottom })
+    await practice.getByRole('button', { name: 'Show answer' }).click()
+    await expect(practice.getByRole('status')).toContainText('Here’s the answer.')
+    expect(await page.evaluate(() => window.scrollY)).toBe(0)
+    for (const element of elements) {
+      const bounds = await element.boundingBox()
+      expect(bounds).not.toBeNull()
+      expect(bounds!.x).toBeGreaterThanOrEqual(side)
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width - side + 0.5)
+      expect(bounds!.y).toBeGreaterThanOrEqual(0)
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(height - bottom + 0.5)
+    }
+    await practice.getByRole('button', { name: 'Next note' }).click()
+  }
+
+  await expect(board).toHaveAttribute('data-retained', 'yes')
+  await page.getByRole('combobox', { name: 'Fret range' }).selectOption({ label: '0–12' })
+  await expect(board.locator('.board-nut')).toHaveCount(1)
+  await expect(board.locator('.board-fret').last().locator('.board-dot')).toHaveCount(2)
+  const gauges = await board.locator('.board-string').evaluateAll((rows) => rows.map((row) => parseFloat(getComputedStyle(row).getPropertyValue('--string-width'))))
+  expect(gauges).toHaveLength(6)
+  expect(gauges.slice(1).every((gauge, index) => gauge > gauges[index])).toBe(true)
+})
+
 test('opens and continues a saved session offline from a Pages-style subpath', async ({ page, context }) => {
   await page.goto('./')
   await expect(page.getByText('Ready to use offline')).toBeVisible({ timeout: 15_000 })
