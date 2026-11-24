@@ -1,12 +1,13 @@
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, Clock3, Lightbulb, ListMusic } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { noteName, octaveOf, pitchAt, positionName, samePosition, type Position } from '../music/theory'
-import { EXERCISES, TOPICS, findExercise, findTopic, type Exercise, type Topic } from '../learning/content'
+import { EXERCISES, TOPICS, findExercise, findTopic, type Exercise, type PositionExercise, type Topic } from '../learning/content'
 import { feedbackFor, isCorrect, solutionFor } from '../learning/exercise'
-import { SESSION_MINUTES, topicProgress, type Progress, type Response, type Session } from '../learning/progress'
+import { SESSION_MINUTES, topicProgress, type Progress, type PositionResponse, type Response, type Session } from '../learning/progress'
 import { Fretboard, noteMarker } from './Fretboard'
 import { AudioButton } from './AudioButton'
 import { IntervalLab, ScaleLab } from './RelationshipLabs'
+import { ChordCheck, TriadLab } from './HarmonyLabs'
 
 function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Position] }> }) {
   const [selected, setSelected] = useState<Position | null>(null)
@@ -38,7 +39,10 @@ function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Posi
 export function LessonBody({ topic }: { topic: Topic }) {
   return <>
     <p className="teaching-copy">{topic.intro}</p>
-    {topic.activity === undefined ? <PositionDemo topic={topic} /> : topic.activity === 'intervals' ? <IntervalLab /> : <ScaleLab />}
+    {topic.activity === undefined && <PositionDemo topic={topic} />}
+    {topic.activity === 'intervals' && <IntervalLab />}
+    {topic.activity === 'scales' && <ScaleLab />}
+    {topic.activity === 'triads' && <TriadLab />}
     <details className="explanation">
         <summary><CircleHelp size={17} /> Why does this work?</summary>
         <p>{topic.detail}</p>
@@ -48,6 +52,13 @@ export function LessonBody({ topic }: { topic: Topic }) {
 
 export function ExerciseBody({ exercise, response, onResponse }: {
   exercise: Exercise; response?: Response; onResponse: (response: Response) => void;
+}) {
+  return exercise.kind === 'chord' ? <ChordCheck exercise={exercise} response={response && 'positions' in response ? response : undefined} onResponse={onResponse} />
+    : <PositionCheck exercise={exercise} response={response && 'position' in response ? response : undefined} onResponse={onResponse} />
+}
+
+function PositionCheck({ exercise, response, onResponse }: {
+  exercise: PositionExercise; response?: PositionResponse; onResponse: (response: PositionResponse) => void;
 }) {
   const [hint, setHint] = useState(false)
   const [reveal, setReveal] = useState<Position | null>(null)
@@ -135,7 +146,7 @@ export function ExerciseView({ exercise, onAttempt }: { exercise: Exercise; onAt
     <div className="learning-layout">
       <a className="back-link" href={`#learn/${exercise.topic}`}><ArrowLeft size={16} /> Back to lesson</a>
       <section className="panel lesson-panel">
-        <div className="eyebrow"><ListMusic size={17} /> Note identification</div>
+        <div className="eyebrow"><ListMusic size={17} /> {exercise.kind === 'chord' ? 'Build a chord' : 'Note identification'}</div>
         <h1 tabIndex={-1}>{exercise.prompt}</h1>
         <ExerciseBody exercise={exercise} response={response} onResponse={(answer) => { if (!response) onAttempt(answer); setResponse(answer) }} />
         {response && response.result !== 'retry' && <div className="learning-actions">
@@ -174,7 +185,7 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
       </div>
       {!completed && <progress className="session-progress" aria-label="Daily practice progress" value={session.step + 1} max={total} />}
       <section className="panel lesson-panel">
-        <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? 'Find a note' : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
+        <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? (exercise.kind === 'chord' ? 'Build a chord' : 'Find a note') : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
         <h1 tabIndex={-1} ref={heading}>{title}</h1>
         {completed ? <>
           <p className="teaching-copy">You worked on {topic.title.toLowerCase()}. Your answers will help choose what to revisit in your next session.</p>

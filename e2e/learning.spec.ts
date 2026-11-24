@@ -73,6 +73,25 @@ test('compares an interval in two places and builds a complete scale', async ({ 
   await expect(scaleLab.getByRole('status')).toContainText('You reached F.')
 })
 
+test('changes a chord’s quality and builds a triad on the board', async ({ page }) => {
+  await page.goto('./#learn/triads')
+  const workshop = page.locator('[aria-label="Triad workshop"]')
+  await expect(workshop.getByRole('status')).toHaveText('C major')
+  await workshop.getByRole('combobox', { name: 'Third', exact: true }).selectOption('3')
+  await expect(workshop.getByRole('status')).toHaveText('C minor')
+  await expect(workshop.getByLabel('Chord notes')).toContainText('E♭')
+  await workshop.getByRole('combobox', { name: 'Fifth', exact: true }).selectOption('6')
+  await expect(workshop.getByRole('status')).toHaveText('C diminished')
+
+  await page.getByRole('link', { name: 'Try an exercise' }).click()
+  const build = page.locator('[aria-label="Build a triad"]')
+  await build.getByRole('button', { name: 'D string, fret 2', exact: true }).click()
+  await build.getByRole('button', { name: 'Open G string', exact: true }).click()
+  await build.getByRole('button', { name: 'Check chord' }).click()
+  await expect(build.getByRole('status')).toContainText('C, E and G make C major.')
+  await expect(page.getByRole('link', { name: 'Next exercise' })).toBeVisible()
+})
+
 test('explores all fret ranges, scale spellings and intervals with usable controls', async ({ page }) => {
   await page.goto('./#fretboard')
   await expect(page.getByRole('heading', { name: 'Fretboard explorer' })).toBeVisible()

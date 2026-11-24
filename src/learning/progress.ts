@@ -3,7 +3,9 @@ import { MAX_FRET, type Position } from '../music/theory'
 
 export type Result = 'correct' | 'retry' | 'shown'
 export type Attempt = { id: string; exercise: string; result: Result; at: number }
-export type Response = { result: Result; position: Position }
+export type PositionResponse = { result: Result; position: Position }
+export type ChordResponse = { result: Result; positions: Position[] }
+export type Response = PositionResponse | ChordResponse
 
 export type Session = {
   id: string
@@ -106,7 +108,8 @@ function isPosition(value: unknown): value is Position {
 }
 
 function isResponse(value: unknown): value is Response {
-  return record(value) && isResult(value.result) && isPosition(value.position)
+  return record(value) && isResult(value.result) && (isPosition(value.position) ||
+    (Array.isArray(value.positions) && value.positions.length === 2 && value.positions.every(isPosition)))
 }
 
 function isAttempt(value: unknown): value is Attempt {
@@ -122,7 +125,10 @@ function isSession(value: unknown): value is Session {
   if (!record(value) || typeof value.id !== 'string' || !isTopic(value.topic) || !Array.isArray(value.exercises) ||
       value.exercises.length !== 3 || !value.exercises.every((id) => typeof id === 'string' && !!findExercise(id))) return false
   return typeof value.step === 'number' && Number.isInteger(value.step) && value.step >= 0 && value.step <= value.exercises.length + 1 &&
-    record(value.responses) && Object.values(value.responses).every(isResponse) &&
+    record(value.responses) && Object.entries(value.responses).every(([id, response]) => {
+      const exercise = findExercise(id)
+      return exercise && isResponse(response) && (exercise.kind === 'chord' ? 'positions' in response : 'position' in response)
+    }) &&
     (value.completedAt === null || (typeof value.completedAt === 'number' && Number.isFinite(value.completedAt)))
 }
 

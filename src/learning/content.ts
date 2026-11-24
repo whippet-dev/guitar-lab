@@ -1,18 +1,20 @@
 import type { Position, StringIndex } from '../music/theory'
+import type { TriadKind } from '../music/harmony'
 import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
+import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads'
 
 export type Topic = {
   id: TopicId
-  group?: 'Scales and intervals'
+  group?: 'Scales and intervals' | 'Harmony in action'
   title: string
   description: string
   intro: string
   detail: string
   task: string
   taskPositions: readonly Position[]
-} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' })
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -43,6 +45,7 @@ export const TOPICS: readonly Topic[] = [
     taskPositions: [0, 1, 3, 12, 13, 15].map((fret) => ({ string: 5, fret })),
   },
   ...RELATIONSHIP_TOPICS,
+  ...HARMONY_TOPICS,
 ]
 
 type Answer =
@@ -50,17 +53,18 @@ type Answer =
   | { kind: 'note'; pitchClass: number }
   | { kind: 'pitch'; midi: number }
 
-export type Exercise = {
+type ExercisePrompt = {
   id: string
   topic: TopicId
   prompt: string
   hint: string
   why: string
   range: [number, number]
-  string?: StringIndex
-  anchor?: Position
-  answer: Answer
 }
+
+export type PositionExercise = ExercisePrompt & { kind?: undefined; string?: StringIndex; anchor?: Position; answer: Answer }
+export type ChordExercise = ExercisePrompt & { kind: 'chord'; root: Position; quality: TriadKind }
+export type Exercise = PositionExercise | ChordExercise
 
 export const EXERCISES: readonly Exercise[] = [
   {
@@ -118,6 +122,7 @@ export const EXERCISES: readonly Exercise[] = [
     range: [0, 5], string: 1, answer: { kind: 'pitch', midi: 62 },
   },
   ...RELATIONSHIP_EXERCISES,
+  ...HARMONY_EXERCISES,
 ]
 
 export function findTopic(id: string) {

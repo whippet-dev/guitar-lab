@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { EXERCISES, TOPICS, findExercise } from './content'
-import { feedbackFor, isCorrect, solutionFor } from './exercise'
+import { chordSolution, feedbackFor, isChordCorrect, isCorrect, solutionFor } from './exercise'
 import { advanceSession, EMPTY_PROGRESS, parseProgress, planSession, recordAttempt, saveSessionResponse, topicProgress, type Progress, type Result } from './progress'
 
 const day = 86_400_000
@@ -10,20 +10,30 @@ function addAttempt(progress: Progress, exercise: string, result: Result, at: nu
 }
 
 describe('exercise content and feedback', () => {
-  it.each(EXERCISES)('has a valid answer within the range for $id', (exercise) => {
+  it.each(EXERCISES.filter((exercise) => exercise.kind === undefined))('has a valid answer within the range for $id', (exercise) => {
     const answer = solutionFor(exercise)
     expect(isCorrect(exercise, answer)).toBe(true)
     expect(feedbackFor(exercise, answer)).toBe(exercise.why)
   })
 
+  it.each(EXERCISES.filter((exercise) => exercise.kind === 'chord'))('finds playable chord tones for $id and accepts them in either order', (exercise) => {
+    const positions = chordSolution(exercise)
+    expect(isChordCorrect(exercise, positions)).toBe(true)
+    expect(isChordCorrect(exercise, [...positions].reverse())).toBe(true)
+    expect(isChordCorrect(exercise, [exercise.root, positions[0]])).toBe(false)
+  })
+
   it('distinguishes the required string, note name and exact octave', () => {
     const exercise = findExercise('higher-e')!
+    if (exercise.kind !== undefined) throw new Error('Expected a position exercise')
     expect(isCorrect(exercise, { string: 5, fret: 0 })).toBe(false)
     expect(isCorrect(exercise, { string: 4, fret: 7 })).toBe(false)
     expect(feedbackFor(exercise, { string: 4, fret: 7 })).toContain('Try again on the low E string')
     expect(feedbackFor(exercise, { string: 5, fret: 11 })).toContain('try a higher fret')
     expect(feedbackFor(exercise, { string: 5, fret: 13 })).toContain('try a lower fret')
-    expect(isCorrect(findExercise('low-g')!, { string: 5, fret: 15 })).toBe(true)
+    const lowG = findExercise('low-g')!
+    if (lowG.kind !== undefined) throw new Error('Expected a position exercise')
+    expect(isCorrect(lowG, { string: 5, fret: 15 })).toBe(true)
   })
 })
 
@@ -101,6 +111,18 @@ describe('daily practice and progress', () => {
     expect(finished.sessionsCompleted).toBe(1)
     expect(finished.session?.completedAt).toBe(3)
     expect(advanceSession(finished, 'one', 4, 4)).toBe(finished)
+  })
+
+  it('restores a checked chord without dropping earlier position attempts', () => {
+    const exercise = findExercise('triad-c-major')!
+    if (exercise.kind !== 'chord') throw new Error('Expected a chord exercise')
+    const session = { ...planSession(EMPTY_PROGRESS, 'chord', 1), topic: exercise.topic, step: 1, exercises: [exercise.id, 'triad-a-minor', 'open-a'] }
+    const prior = addAttempt({ ...EMPTY_PROGRESS, session }, 'open-a', 'correct', 1)
+    const positions = chordSolution(exercise)
+    const checked = saveSessionResponse(prior, session.id, exercise.id, { result: 'correct', positions }, 2)
+    const restored = parseProgress(JSON.stringify(checked))
+    expect(restored.session?.responses[exercise.id]).toEqual({ result: 'correct', positions })
+    expect(restored.attempts.map(({ exercise: id }) => id)).toEqual(['open-a', exercise.id])
   })
 
   it('recovers from missing, invalid, or superseded local data', () => {
