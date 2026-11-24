@@ -29,6 +29,7 @@ export function feedbackFor(exercise: PositionExercise, position: Position) {
     return `You found ${pitch} at ${location.toLowerCase()}. Try again on the ${STRINGS[exercise.string].name} string.`
   }
   if (exercise.answer.kind === 'tones') return `That’s ${pitch}. ${exercise.hint}`
+  if (exercise.listen) return `That’s ${pitch}. Hear the target and your note side by side, then adjust your choice.`
   if (exercise.anchor) {
     const distance = pitchAt(position) - pitchAt(exercise.anchor)
     if (distance === 0) return 'That’s the starting pitch. Try the note that completes the relationship.'

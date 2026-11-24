@@ -139,6 +139,7 @@ h1:focus, main:focus { outline: none; }
 .lab-sequence .is-filled { color: #efe0ff; background: #332645; border-color: #625078; }
 .music-lab button:disabled { cursor: default; opacity: .55; }
 .lab-instruction { color: var(--muted); font-size: .875rem; }
+.listening-prompt { display: grid; gap: 8px; margin-bottom: 12px; }
 .lab-chord { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 364px; }
 .lab-chord span { display: grid; justify-items: center; padding: 6px 3px; border-radius: 8px; border: 1px solid var(--border); background: #211b2e; color: var(--muted); font-size: .72rem; }
 .lab-chord strong { color: var(--accent); font-size: 1.02rem; }

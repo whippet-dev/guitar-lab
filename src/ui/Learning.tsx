@@ -66,6 +66,7 @@ function PositionCheck({ exercise, response, onResponse }: {
   const [reveal, setReveal] = useState<Position | null>(null)
   const finished = !!response && response.result !== 'retry'
   const anchor = exercise.anchor
+  const listening = exercise.listen?.map(pitchAt)
 
   function submit(position: Position) {
     onResponse({ result: isCorrect(exercise, position) ? 'correct' : 'retry', position })
@@ -79,7 +80,10 @@ function PositionCheck({ exercise, response, onResponse }: {
 
   return (
     <>
-      <p className="teaching-copy">Tap a position on the fretboard.</p>
+      {listening ? <div className="listening-prompt">
+        <p className="teaching-copy">Hear the pair, then tap a fret that matches the second pitch. Use the hint if you’re practising without sound.</p>
+        <AudioButton pitches={listening} label="Hear the two notes" />
+      </div> : <p className="teaching-copy">Tap a position on the fretboard.</p>}
       <Fretboard range={exercise.range} guideString={exercise.string} selected={response?.position} onSelect={submit} locked={finished}
         reveal={reveal ?? response?.position ?? anchor} marker={(position) => samePosition(response?.position, position) ? noteMarker(position, finished ? 'target' : undefined)
           : samePosition(anchor, position) ? noteMarker(position, 'root') : undefined} />
@@ -92,6 +96,7 @@ function PositionCheck({ exercise, response, onResponse }: {
       </div>
       <div className="exercise-tools">
         {!finished && <>
+          {listening && response && <AudioButton pitches={[listening[1], pitchAt(response.position)]} label="Hear target, then your note" />}
           <button className="button button-secondary" type="button" aria-expanded={hint} aria-controls="exercise-hint" onClick={() => setHint(!hint)}><Lightbulb size={17} />{hint ? 'Hide hint' : 'Get a hint'}</button>
           <button className="button button-quiet" type="button" onClick={showAnswer}>Show answer</button>
         </>}
@@ -144,15 +149,18 @@ export function ExerciseView({ exercise, onAttempt }: { exercise: Exercise; onAt
   const [response, setResponse] = useState<Response>()
   const group = EXERCISES.filter((item) => item.topic === exercise.topic)
   const next = group[group.findIndex((item) => item.id === exercise.id) + 1]
+  const following = TOPICS[TOPICS.findIndex((topic) => topic.id === exercise.topic) + 1]
   return (
     <div className="learning-layout">
       <a className="back-link" href={`#learn/${exercise.topic}`}><ArrowLeft size={16} /> Back to lesson</a>
       <section className="panel lesson-panel">
-        <div className="eyebrow"><ListMusic size={17} /> {exercise.kind === 'chord' ? 'Build a chord' : 'Note identification'}</div>
+        <div className="eyebrow"><ListMusic size={17} /> {exercise.kind === 'chord' ? 'Build a chord' : exercise.listen ? 'Listen and match' : 'Note identification'}</div>
         <h1 tabIndex={-1}>{exercise.prompt}</h1>
         <ExerciseBody exercise={exercise} response={response} onResponse={(answer) => { if (!response) onAttempt(answer); setResponse(answer) }} />
         {response && response.result !== 'retry' && <div className="learning-actions">
-          <a href={next ? `#exercise/${next.id}` : '#learn'} className="button button-primary">{next ? 'Next exercise' : 'Back to lessons'}<ArrowRight size={19} /></a>
+          <a href={next ? `#exercise/${next.id}` : following ? `#learn/${following.id}` : '#learn'} className="button button-primary">
+            {next ? 'Next exercise' : following ? 'Next lesson' : 'Back to lessons'}<ArrowRight size={19} /></a>
+          {!next && following && <p className="muted">{following.title}</p>}
         </div>}
       </section>
     </div>
@@ -187,7 +195,7 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
       </div>
       {!completed && <progress className="session-progress" aria-label="Daily practice progress" value={session.step + 1} max={total} />}
       <section className="panel lesson-panel">
-        <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? (exercise.kind === 'chord' ? 'Build a chord' : 'Find a note') : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
+        <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? (exercise.kind === 'chord' ? 'Build a chord' : exercise.listen ? 'Listen and match' : 'Find a note') : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
         <h1 tabIndex={-1} ref={heading}>{title}</h1>
         {completed ? <>
           <p className="teaching-copy">You worked on {topic.title.toLowerCase()}. Your answers will help choose what to revisit in your next session.</p>

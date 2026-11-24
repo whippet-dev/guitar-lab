@@ -105,6 +105,17 @@ test('keeps the same lead note selected as the chord changes', async ({ page }) 
   await expect(workshop.getByRole('button', { name: 'C major, chord 2' })).toBeVisible()
 })
 
+test('compares a listening guess with the target and offers a silent hint', async ({ page }) => {
+  await page.goto('./#exercise/ear-a-minor-third')
+  await expect(page.getByRole('button', { name: 'Hear the two notes', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'A string, fret 2', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Hear target, then your note', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Get a hint' }).click()
+  await expect(page.getByText('The second note is three frets higher', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: 'A string, fret 3', exact: true }).click()
+  await expect(page.getByText('You’ve heard and found a minor third.', { exact: false })).toBeVisible()
+})
+
 test('explores all fret ranges, scale spellings and intervals with usable controls', async ({ page }) => {
   await page.goto('./#fretboard')
   await expect(page.getByRole('heading', { name: 'Fretboard explorer' })).toBeVisible()

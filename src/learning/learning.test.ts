@@ -14,6 +14,7 @@ describe('exercise content and feedback', () => {
     const answer = solutionFor(exercise)
     expect(isCorrect(exercise, answer)).toBe(true)
     expect(feedbackFor(exercise, answer)).toBe(exercise.why)
+    if (exercise.listen) expect(isCorrect(exercise, exercise.listen[1])).toBe(true)
   })
 
   it.each(EXERCISES.filter((exercise) => exercise.kind === 'chord'))('finds playable chord tones for $id and accepts them in either order', (exercise) => {

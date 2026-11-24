@@ -11,7 +11,8 @@
 | Chords | Build major, minor, diminished and augmented triads from thirds and fifths | Hear how moving one note changes the chord and find chord tones on the neck | Guided lesson and practice |
 | Keys and changes | Compare chords made from one major scale, using key and progression controls | Test the same melody note against changing chords | Guided lesson and practice |
 | CAGED | Five movable shapes, roots and overlapping positions | Connect rhythm and lead playing in a familiar key | Planned |
-| Rhythm and listening | Pulse, subdivisions, interval recognition and call and response | Play with intention and hear the sound before reaching for it | Planned throughout |
+| Listening | Match a heard note to the fretboard and compare a guess to the target | Hum and find small intervals by ear | Guided lesson and practice |
+| Rhythm | Pulse, subdivisions and call and response | Place phrases in time | Planned |
 | Practical lead | Motifs, phrasing, space and resolving notes | Improvise over simple changes | Planned |
 
 ## Exercise formats
@@ -19,6 +20,7 @@
 - **Interactive demonstration.** Follow a short explanation, select highlighted positions and hear the pitches. An optional detail explains the relationship.
 - **Find a note.** Choose a fret location in the requested area. Exercises can check the note name, an exact pitch or a specific position. Feedback uses the selected string and fret and explains the answer.
 - **Build a chord.** Choose the missing chord tones on the fretboard, hear them together and check the result. Alternate positions and octaves of the same notes are accepted.
+- **Listen and match.** Hear a pair of notes, then find the second pitch. Compare an attempt to the target or use a visual hint.
 - **Fretboard practice.** In the explorer, find a named note or name a marked position. Keep going at your own pace, with questions drawn from the frets in view.
 - **Practice sequence.** Start with a short demonstration, work through three connected prompts, then take one idea into playing. One prompt revisits a prerequisite and the remaining prompts apply the idea in related positions.
 - **Planned formats.** Match sounds, tap rhythm, play a response and reflect on an improvisation task.
