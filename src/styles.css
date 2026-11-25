@@ -151,6 +151,8 @@ h1:focus, main:focus { outline: none; }
 .rhythm-pad { color: var(--muted); padding-inline: 4px; border-color: #493958; background: #2c233b; }
 .rhythm-pad[aria-pressed=true] { color: #251837; background: var(--accent); border-color: var(--accent); }
 .rhythm-pad.is-current { outline: 2px solid var(--accent-strong); outline-offset: 1px; }
+.phrase-grid .rhythm-pad { display: flex; justify-content: space-between; gap: 3px; padding-inline: 7px; }
+.phrase-grid small { font-size: .72rem; }
 .listening-prompt { display: grid; gap: 8px; margin-bottom: 12px; }
 .lab-chord { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-width: 364px; }
 .lab-chord span { display: grid; justify-items: center; padding: 6px 3px; border-radius: 8px; border: 1px solid var(--tone-edge, var(--border)); background: var(--tone-surface, #211b2e); color: var(--muted); font-size: .72rem; }

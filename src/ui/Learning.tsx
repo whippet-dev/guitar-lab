@@ -12,6 +12,7 @@ import { ProgressionLab } from './ProgressionLab'
 import { RhythmLab } from './RhythmLab'
 import { CagedLab, VoicingLab } from './GuitarShapesLab'
 import { PentatonicLab } from './PentatonicLab'
+import { PhraseLab } from './PhraseLab'
 
 function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Position] }> }) {
   const [selected, setSelected] = useState<Position | null>(null)
@@ -52,6 +53,7 @@ export function LessonBody({ topic }: { topic: Topic }) {
     {topic.activity === 'caged' && <CagedLab />}
     {topic.activity === 'voicings' && <VoicingLab />}
     {topic.activity === 'pentatonic' && <PentatonicLab />}
+    {topic.activity === 'phrasing' && <PhraseLab />}
     <details className="explanation">
         <summary><CircleHelp size={17} /> Why does this work?</summary>
         <p>{topic.detail}</p>
@@ -219,11 +221,11 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
           {exercise && <ExerciseBody key={`${session.id}/${exercise.id}`} exercise={exercise} response={response} onResponse={(answer) => onResponse(session, exercise.id, answer)} />}
           {session.step > session.exercises.length && <>
             <p className="teaching-copy">{topic.task}</p>
-            <AudioButton pitches={topic.taskPositions.map(pitchAt)} label="Listen to the example" />
+            {topic.activity === 'phrasing' ? <PhraseLab /> : <AudioButton pitches={topic.taskPositions.map(pitchAt)} label="Listen to the example" />}
           </>}
           {(!exercise || (response && response.result !== 'retry')) && <div className="learning-actions">
             <button className="button button-primary" type="button" onClick={() => onAdvance(session)}>{session.step === 0 ? 'Start exercises' : session.step === total - 1 ? 'Finish practice' : 'Continue'}<ArrowRight size={19} /></button>
-            {session.step === total - 1 && <a href={topic.activity ? `#learn/${topic.id}` : '#fretboard'} className="button button-secondary">{topic.activity ? 'Return to the demonstration' : 'Try it in the explorer'}</a>}
+            {session.step === total - 1 && topic.activity !== 'phrasing' && <a href={topic.activity ? `#learn/${topic.id}` : '#fretboard'} className="button button-secondary">{topic.activity ? 'Return to the demonstration' : 'Try it in the explorer'}</a>}
           </div>}
         </>}
       </section>

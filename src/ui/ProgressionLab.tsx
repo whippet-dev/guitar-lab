@@ -65,5 +65,6 @@ export function ProgressionLab() {
       {leadPitch !== undefined && <AudioButton pitches={[...chord.pitches, leadPitch]} together label="Hear your note over the chord" />}
     </div>
     {leadPitch !== undefined && leadPitch !== selectedPitch && <p className="lab-instruction">Playback lifts your note by octaves so you can hear it above the chord.</p>}
+    <a className="back-link" href="#learn/phrasing">Try these ideas in a phrase</a>
   </div>
 }

@@ -4,9 +4,9 @@ import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
 import { LISTENING_EXERCISES, LISTENING_TOPIC } from './listening'
 import { RHYTHM_EXERCISES, RHYTHM_TOPIC } from './rhythm'
-import { PENTATONIC_EXERCISES, PENTATONIC_TOPIC, SHAPE_EXERCISES, SHAPE_TOPICS } from './playing'
+import { PENTATONIC_EXERCISES, PENTATONIC_TOPIC, PHRASE_EXERCISES, PHRASE_TOPIC, SHAPE_EXERCISES, SHAPE_TOPICS } from './playing'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' | 'phrasing'
 
 export type Topic = {
   id: TopicId
@@ -17,7 +17,7 @@ export type Topic = {
   detail: string
   task: string
   taskPositions: readonly Position[]
-} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' })
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' | 'phrasing' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -53,6 +53,7 @@ export const TOPICS: readonly Topic[] = [
   RHYTHM_TOPIC,
   ...SHAPE_TOPICS,
   PENTATONIC_TOPIC,
+  PHRASE_TOPIC,
 ]
 
 type Answer =
@@ -135,6 +136,7 @@ export const EXERCISES: readonly Exercise[] = [
   ...RHYTHM_EXERCISES,
   ...SHAPE_EXERCISES,
   ...PENTATONIC_EXERCISES,
+  ...PHRASE_EXERCISES,
 ]
 
 export function findTopic(id: string) {

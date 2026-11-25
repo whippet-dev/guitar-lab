@@ -1,4 +1,4 @@
-import type { PositionExercise, Topic } from './content'
+import type { PositionExercise, RhythmExercise, Topic } from './content'
 
 export const SHAPE_TOPICS: readonly Topic[] = [
   {
@@ -64,4 +64,30 @@ export const PENTATONIC_EXERCISES: readonly PositionExercise[] = [
     anchor: { string: 0, fret: 8 }, prompt: 'Move from the shared C into position 2 and find the next scale note.',
     hint: 'The next note after C is D. Move up a whole step on the high E string.',
     why: 'D is at fret 10. C and D are the two high E notes in this position.', answer: { kind: 'pitch', midi: 74 } },
+]
+
+export const PHRASE_TOPIC: Topic = {
+  id: 'phrasing', group: 'Play it on guitar', activity: 'phrasing', title: 'Make a phrase over two chords',
+  description: 'Try a question and answer, leave space and hear what changes when you land on a chord tone.',
+  intro: 'Play the example. The first bar asks a question with three notes, and the second starts the same way before answering. Choose a beat and tap a marked fret to change the melody. Try moving a note onto an offbeat or leaving it out.',
+  detail: 'A motif is a short musical idea you can repeat or vary. Keep part of it, perhaps the first two notes or their rhythm, so the answer sounds connected. A chord tone often feels settled when held over its chord. Notes outside the chord can add colour, especially when they move to a chord tone. Listen for the difference on a long or accented note.',
+  task: 'Start with the question and answer. In bar 2, compare ending on F and E over F major. Then switch to A minor → G major and try D, the fifth of G, as the landing note. Play the phrase back with the chords or try it on your guitar.',
+  taskPositions: [{ string: 0, fret: 1 }, { string: 0, fret: 0 }],
+}
+
+export const PHRASE_EXERCISES: readonly (PositionExercise | RhythmExercise)[] = [
+  { id: 'phrase-land-f', topic: 'phrasing', range: [0, 5], string: 0, scale: { tonic: 0, kind: 'major' },
+    anchor: { string: 0, fret: 0 }, prompt: 'The backing changes from A minor to F major. Find F on high E as a landing note.',
+    hint: 'The marked E is the fifth of A minor. Move up a semitone to reach the root of F major.',
+    why: 'A small move can follow a big change in the harmony. E works as a chord tone over A minor, and F gives the second phrase a settled ending over F major.',
+    answer: { kind: 'pitch', midi: 65 } },
+  { id: 'phrase-keep-c', topic: 'phrasing', range: [0, 5], string: 1, scale: { tonic: 0, kind: 'major' },
+    prompt: 'Find C on the B string. It belongs to both A minor and F major.',
+    hint: 'C is one semitone above open B. Play it as the chords change and listen to the different bass underneath.',
+    why: 'C is the minor third of A minor and the perfect fifth of F major. A shared note can connect two chords without moving the melody.',
+    answer: { kind: 'pitch', midi: 60 } },
+  { id: 'phrase-offbeat-answer', topic: 'phrasing', kind: 'rhythm', slots: [0, 3, 6],
+    prompt: 'Give a rhythm three notes. Start on 1, answer on the “and” after 2 and land on 4.',
+    hint: 'Keep counting through beat 3. The offbeat is the second box under 2.',
+    why: 'The offbeat makes the middle note arrive between clicks. Space before beat 4 lets the final note stand out.' },
 ]

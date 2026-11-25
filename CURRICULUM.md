@@ -14,7 +14,7 @@
 | Voicings | Compare triad inversions on adjacent strings | Play the same chord with a different bass or top note | Guided lesson and practice |
 | Listening | Match a heard note to the fretboard and compare a guess to the target | Hum and find small intervals by ear | Guided lesson and practice |
 | Rhythm | Place notes on beats and offbeats in a playable one-bar pattern | Leave space in a phrase while keeping the same pulse | Guided lesson and practice |
-| Practical lead | Motifs, phrasing, space and resolving notes | Improvise over simple changes | Planned |
+| Practical lead | Repeat and vary a motif, choose rests, and compare landing notes against changing chords | Write and hear a two-bar lead phrase | Guided lesson and practice |
 
 ## Exercise formats
 

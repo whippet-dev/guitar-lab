@@ -115,6 +115,23 @@ test('keeps the same lead note selected as the chord changes', async ({ page }) 
   await expect(workshop.getByRole('button', { name: 'C major, chord 2' })).toBeVisible()
 })
 
+test('edits a phrase across two chords and changes its landing note and rhythm', async ({ page }) => {
+  await page.goto('./#learn/phrasing')
+  await page.getByRole('button', { name: 'Bar 2 · F major', exact: true }).click()
+  await page.getByRole('button', { name: 'beat 4, F', exact: true }).click()
+  await page.getByRole('button', { name: 'Open high E string, E', exact: true }).click()
+  await expect(page.getByText('E lies outside F major.', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: 'Make this a rest' }).click()
+  await expect(page.getByRole('button', { name: 'beat 4, rest', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('combobox', { name: 'Chord changes', exact: true }).selectOption('1')
+  await page.getByRole('button', { name: 'high E string, fret 3, G, root of G major', exact: true }).click()
+  await expect(page.getByText('G is the root of G major.', { exact: false })).toBeVisible()
+  await page.getByRole('button', { name: 'Play phrase', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Stop', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Play phrase', exact: true })).toBeVisible()
+})
+
 test('compares a listening guess with the target and offers a silent hint', async ({ page }) => {
   await page.goto('./#exercise/ear-a-minor-third')
   await expect(page.getByRole('button', { name: 'Hear the two notes', exact: true })).toBeVisible()
