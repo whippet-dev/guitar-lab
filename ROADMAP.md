@@ -6,5 +6,6 @@
 4. **Built.** Match heard intervals on the fretboard and compare attempts with the target. Listening checks work within daily practice and offer visual hints.
 5. **Built.** An editable rhythm bar with tempo, a visual beat and daily checks on pulse, offbeats and rests.
 6. **Built.** CAGED workshop with open forms and shared frets, and playable triad inversions on adjacent strings. Both feed into daily practice.
-7. **In progress.** Connect neighbouring pentatonic positions, then bring the rhythm bar and chord changes together in short improvisation tasks.
-8. **Optional future work.** Explore microphone or audio-interface input if it makes practice more useful. Keep tap and listening alternatives available.
+7. **Built.** Connected pentatonic positions with shared frets, relative major and minor, and a chord-tone view. Daily checks cover crossing a position and finding the same pitch on another string.
+8. **In progress.** Bring rhythm and chord changes together in short improvisation tasks.
+9. **Optional future work.** Explore microphone or audio-interface input if it makes practice more useful. Keep tap and listening alternatives available.

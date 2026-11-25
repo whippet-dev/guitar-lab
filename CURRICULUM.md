@@ -7,7 +7,7 @@
 | Octaves | 12 semitones on one string and repeating note names | Move a short riff to another register | Initial introduction |
 | Intervals | Compare thirds, fifths and octaves on a movable starting note | Hear the distance and find it across strings | Guided lesson and practice |
 | Scales | Build major and natural minor with W/H steps and degree formulas | Compare parallel scales and hear the change in the third | Guided lesson and practice |
-| Pentatonics | Major and minor pentatonic, position connections and root locations | Move a phrase between positions | Explorer preview |
+| Pentatonics | Connect five positions, compare relative major and minor, and reveal tonic triads | Cross into a neighbouring position and find alternate locations for a note | Guided lesson and practice |
 | Chords | Build major, minor, diminished and augmented triads and compare inversions by ear | Hear how changing a chord tone or the bass changes the sound | Guided lesson and practice |
 | Keys and changes | Compare chords made from one major scale, using key and progression controls | Test the same melody note against changing chords | Guided lesson and practice |
 | CAGED | Compare five movable forms with their open shapes and find shared frets | Find the same chord up the neck | Guided lesson and practice |

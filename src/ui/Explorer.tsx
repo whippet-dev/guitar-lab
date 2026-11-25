@@ -135,6 +135,7 @@ export function Explorer() {
                 <p><strong>{triadNotes[0].name}, {triadNotes[1].name} and {triadNotes[2].name}</strong> form the {rootName} {TRIADS[triad].label} triad.</p>
                 <AudioButton pitches={triadNotes.map(({ interval }) => 48 + root + interval.semitones)} together label="Hear triad" />
               </div>}
+              {hasLargerSteps && <a className="back-link" href="#learn/pentatonic">Connect pentatonic positions</a>}
             </div>
             <details className="explanation">
               <summary><CircleHelp size={17} /> How do the scale options differ?</summary>

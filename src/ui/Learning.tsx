@@ -11,6 +11,7 @@ import { ChordCheck, TriadLab } from './HarmonyLabs'
 import { ProgressionLab } from './ProgressionLab'
 import { RhythmLab } from './RhythmLab'
 import { CagedLab, VoicingLab } from './GuitarShapesLab'
+import { PentatonicLab } from './PentatonicLab'
 
 function PositionDemo({ topic }: { topic: Extract<Topic, { demo: [Position, Position] }> }) {
   const [selected, setSelected] = useState<Position | null>(null)
@@ -50,6 +51,7 @@ export function LessonBody({ topic }: { topic: Topic }) {
     {topic.activity === 'rhythm' && <RhythmLab />}
     {topic.activity === 'caged' && <CagedLab />}
     {topic.activity === 'voicings' && <VoicingLab />}
+    {topic.activity === 'pentatonic' && <PentatonicLab />}
     <details className="explanation">
         <summary><CircleHelp size={17} /> Why does this work?</summary>
         <p>{topic.detail}</p>

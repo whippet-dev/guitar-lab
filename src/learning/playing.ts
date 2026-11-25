@@ -41,3 +41,27 @@ export const SHAPE_EXERCISES: readonly PositionExercise[] = [
     why: 'G-string fret 12 is G. In this voicing the higher strings complete the chord with C and E.',
     answer: { kind: 'position', position: { string: 2, fret: 12 } } },
 ]
+
+export const PENTATONIC_TOPIC: Topic = {
+  id: 'pentatonic', group: 'Play it on guitar', activity: 'pentatonic', title: 'Connect pentatonic positions',
+  description: 'Cross between shapes through shared notes, then find the chord inside the scale.',
+  intro: 'Start with position 1 of A minor pentatonic. Each string has two notes. The higher of those two also belongs to position 2. Try the crossing on one string, then see where it takes you in the next position.',
+  detail: 'The numbering here starts where the minor tonic is the lower note on the low E string. After position 5, the shapes repeat an octave higher. A minor and C major pentatonic share their pitches, but their tonic and chord tones change. Switch between them without moving your hand and listen to each triad.',
+  task: 'On the high E string, play frets 5, 8 and 10. Pause on 8, the link between positions 1 and 2. Then work back through 8 to 5 and let the final A ring. Try it on guitar or hum the phrase with the example.',
+  taskPositions: [5, 8, 10, 8, 5].map((fret) => ({ string: 0, fret })),
+}
+
+export const PENTATONIC_EXERCISES: readonly PositionExercise[] = [
+  { id: 'pentatonic-crossing', topic: 'pentatonic', range: [5, 11], string: 0, scale: { tonic: 9, kind: 'minorPentatonic' },
+    anchor: { string: 0, fret: 5 }, prompt: 'Find C, the note shared by positions 1 and 2 on high E in A minor pentatonic.',
+    hint: 'C is a minor third above the marked A. Move up three frets on the high E string.',
+    why: 'High E fret 8 is C. It finishes the pair of notes in position 1 and starts the pair in position 2.', answer: { kind: 'pitch', midi: 72 } },
+  { id: 'pentatonic-same-a', topic: 'pentatonic', range: [1, 8], string: 2, scale: { tonic: 9, kind: 'minorPentatonic' },
+    anchor: { string: 3, fret: 7 }, prompt: 'Find the same A on the G string.',
+    hint: 'The marked A is on D-string fret 7. Open G is five semitones above open D, so move five frets back on the G string.',
+    why: 'G-string fret 2 and D-string fret 7 both sound A3. Use the alternative position when it puts the next note of your phrase within reach.', answer: { kind: 'pitch', midi: 57 } },
+  { id: 'pentatonic-next-note', topic: 'pentatonic', range: [5, 11], string: 0, scale: { tonic: 9, kind: 'minorPentatonic' },
+    anchor: { string: 0, fret: 8 }, prompt: 'Move from the shared C into position 2 and find the next scale note.',
+    hint: 'The next note after C is D. Move up a whole step on the high E string.',
+    why: 'D is at fret 10. C and D are the two high E notes in this position.', answer: { kind: 'pitch', midi: 74 } },
+]

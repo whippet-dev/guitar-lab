@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { pentatonicPair } from './pentatonic'
 import { degreeSymbol, frequencyOf, intervalFrom, intervalNote, MAX_FRET, noteName, octaveOf, pitchAt, pitchClass, SCALES, scaleNotes, scaleSteps, STRINGS, type ScaleKind, type StringIndex } from './theory'
 
 describe('standard guitar tuning and the fretboard', () => {
@@ -89,4 +90,23 @@ describe('note spelling, intervals and scales', () => {
       }
     }
   })
+})
+
+it('connects all five pentatonic positions in every key with a shared note per string', () => {
+  for (let tonic = 0; tonic < 12; tonic++) {
+    for (let position = 0; position < 5; position++) {
+      const { current, next } = pentatonicPair(tonic, position)
+      expect(current).toHaveLength(12)
+      expect(next).toHaveLength(12)
+      for (let offset = 0; offset < 12; offset += 2) expect(current[offset + 1]).toEqual(next[offset])
+      for (const note of [...current, ...next]) {
+        expect(note.fret).toBeGreaterThanOrEqual(0)
+        expect(note.fret).toBeLessThanOrEqual(MAX_FRET)
+        expect(SCALES.minorPentatonic.semitones).toContain(pitchClass(pitchAt(note) - tonic))
+      }
+    }
+  }
+  const aMinor = pentatonicPair(9, 0)
+  expect(aMinor.current.slice(0, 2).map(({ fret }) => fret)).toEqual([5, 8])
+  expect(aMinor.next.slice(0, 2).map(({ fret }) => fret)).toEqual([8, 10])
 })
