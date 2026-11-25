@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pentatonicPair } from './pentatonic'
-import { degreeSymbol, frequencyOf, intervalFrom, intervalNote, MAX_FRET, noteName, octaveOf, pitchAt, pitchClass, SCALES, scaleNotes, scaleSteps, STRINGS, type ScaleKind, type StringIndex } from './theory'
+import { degreeSymbol, frequencyOf, intervalFrom, intervalNote, MAX_FRET, noteName, octaveOf, pitchAt, pitchClass, SCALES, scaleNotes, scalePitchesInRange, scaleSteps, STRINGS, type ScaleKind, type StringIndex } from './theory'
 
 describe('standard guitar tuning and the fretboard', () => {
   it('maps string numbers to the correct sounding notes and octaves', () => {
@@ -25,6 +25,13 @@ describe('standard guitar tuning and the fretboard', () => {
     for (const fret of [-1, 25, 0.5, NaN]) expect(() => pitchAt({ string: 0, fret })).toThrow(RangeError)
     expect(() => pitchAt({ string: 6 as StringIndex, fret: 0 })).toThrow(RangeError)
   })
+})
+
+it('plays each available scale pitch once in ascending order within the chosen frets', () => {
+  expect(scalePitchesInRange(9, 'minorPentatonic', [0, 5])).toEqual([40, 43, 45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69])
+  expect(scalePitchesInRange(9, 'minorPentatonic', [6, 12])).toEqual([48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72, 74, 76])
+  expect(scalePitchesInRange(9, 'minorPentatonic', [0, 0])).toEqual([40, 45, 50, 55, 64])
+  expect(scalePitchesInRange(4, 'major', [0, 0])).toEqual([40, 45, 59, 64])
 })
 
 describe('note spelling, intervals and scales', () => {

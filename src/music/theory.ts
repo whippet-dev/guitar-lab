@@ -87,6 +87,18 @@ export function scaleNotes(root: number, kind: ScaleKind, spelling: Spelling = '
   return scale.semitones.map((offset, index) => spellDegree(root, scale.degrees[index], offset, spelling))
 }
 
+export function scalePitchesInRange(root: number, kind: ScaleKind, [first, last]: readonly [number, number]) {
+  const offsets: readonly number[] = SCALES[kind].semitones
+  const pitches = new Set<number>()
+  for (const { midi } of STRINGS) {
+    for (let fret = first; fret <= last; fret++) {
+      const pitch = midi + fret
+      if (offsets.includes(pitchClass(pitch - root))) pitches.add(pitch)
+    }
+  }
+  return [...pitches].sort((a, b) => a - b)
+}
+
 export const INTERVALS = [
   ['1', 'Starting note', 1], ['♭2', 'Minor second', 2], ['2', 'Major second', 2], ['♭3', 'Minor third', 3],
   ['3', 'Major third', 3], ['4', 'Perfect fourth', 4], ['♯4', 'Tritone', 4], ['5', 'Perfect fifth', 5],

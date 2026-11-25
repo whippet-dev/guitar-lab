@@ -3,7 +3,7 @@ import { CircleHelp, Guitar } from 'lucide-react'
 import { Fretboard, toneKind } from './Fretboard'
 import { FretboardPractice } from './FretboardPractice'
 import { AudioButton } from './AudioButton'
-import { degreeSymbol, INTERVALS, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, scaleSteps, type Position, type ScaleKind, type Spelling } from '../music/theory'
+import { degreeSymbol, INTERVALS, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, scalePitchesInRange, scaleSteps, type Position, type ScaleKind, type Spelling } from '../music/theory'
 import { tonicTriadKind, TRIADS } from '../music/harmony'
 
 const MODES = ['Notes', 'Scales', 'Intervals', 'Practice'] as const
@@ -97,6 +97,7 @@ export function Explorer() {
             <div className="segmented scale-labels" role="group" aria-label="Scale fretboard labels">
               {scaleLabels.map((label) => <button key={label} type="button" aria-pressed={scaleLabel === label} onClick={() => setScaleLabel(label)}>{label}</button>)}
             </div>
+            <AudioButton key={`${root}-${kind}-${range}`} groups={scalePitchesInRange(root, kind, RANGES[range]).map((note) => [note])} gap={0.34} label="Hear scale" />
             <ul className="scale-legend" aria-label="Highlighted scale degrees">
               {scale.map(({ role, symbol }) => role && <li key={symbol}><span className={`fret-note ${role}`}>{symbol}</span>{roleNames[role]}</li>)}
             </ul>
@@ -139,6 +140,7 @@ export function Explorer() {
             </div>
             <details className="explanation">
               <summary><CircleHelp size={17} /> How do the scale options differ?</summary>
+              <p><strong>Hear scale</strong> plays the scale notes available in your chosen fret range, from low to high. Two strings can give you the same pitch. You’ll hear that pitch once.</p>
               <p>A scale is an ordered pattern of pitches. The steps above measure the gaps between its notes, including the last step back to the tonic an octave higher. W is a whole step (two semitones) and H is a half step (one semitone).</p>
               <p>Major and natural minor each use seven notes. Pentatonic means five notes. Major pentatonic leaves out 4 and 7 from the major scale. Minor pentatonic leaves out 2 and ♭6 from natural minor. Both have some gaps of three semitones.</p>
               <p>Scale degrees describe intervals from the tonic. A ♭3 is a third one semitone lower than in the major scale on the same tonic. C is the second note of A minor pentatonic, but its degree is still ♭3.</p>
