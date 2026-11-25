@@ -6,7 +6,7 @@ import type { ChordExercise } from '../learning/content'
 import { chordSolution, isChordCorrect } from '../learning/exercise'
 import type { ChordResponse } from '../learning/progress'
 import { AudioButton } from './AudioButton'
-import { Fretboard } from './Fretboard'
+import { Fretboard, toneKind } from './Fretboard'
 
 const fretRange = [0, 5] as const
 const chordRoots = [48, 43, 45, 50, 52, 53]
@@ -37,7 +37,7 @@ export function TriadLab() {
     </div>
     <p className="lab-instruction">The numbers are semitones above the root.</p>
     <div className="lab-chord" aria-label="Chord notes">
-      {notes.map(({ degree, name }) => <span key={degree}><strong>{name}</strong>{degree === 1 ? 'Root' : degree === 3 ? 'Third' : 'Fifth'}</span>)}
+      {notes.map(({ degree, name, pitch }) => <span key={degree} className={toneKind(degree, pitchClass(pitch - root))}><strong>{name}</strong>{degree === 1 ? 'Root' : degree === 3 ? 'Third' : 'Fifth'}</span>)}
     </div>
     <details className="explanation">
       <summary><CircleHelp size={17} /> What if another note is lowest?</summary>
@@ -49,7 +49,7 @@ export function TriadLab() {
     <div className="lab-choices"><AudioButton pitches={pitches} together label="Hear the chord" /><AudioButton pitches={pitches} label="Hear notes separately" /></div>
     <Fretboard range={fretRange} selected={selected} onSelect={setSelected} marker={(position) => {
       const note = notes.find(({ pitch }) => pitch === pitchClass(pitchAt(position)))
-      return note ? { label: note.name, kind: note.degree === 1 ? 'root' : undefined } : undefined
+      return note ? { label: note.name, kind: toneKind(note.degree, pitchClass(note.pitch - root)) } : undefined
     }} />
     <div className="lab-result">
       <p role="status"><strong>{chord}</strong>{inversion > 0 && ` · ${notes[inversion].name} in the bass`}{selected && (active ? ` · ${active.name} is the ${active.degree === 1 ? 'root' : active.degree === 3 ? 'third' : 'fifth'}.` : ` · ${noteName(pitchAt(selected), 'common')} sits outside the chord.`)}</p>

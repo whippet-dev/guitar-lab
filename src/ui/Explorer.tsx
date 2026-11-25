@@ -1,22 +1,46 @@
 import { useState } from 'react'
 import { CircleHelp, Guitar } from 'lucide-react'
-import { Fretboard } from './Fretboard'
+import { Fretboard, toneKind } from './Fretboard'
 import { FretboardPractice } from './FretboardPractice'
 import { AudioButton } from './AudioButton'
-import { degreeSymbol, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, type Position, type ScaleKind, type Spelling } from '../music/theory'
+import { degreeSymbol, INTERVALS, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, scaleSteps, type Position, type ScaleKind, type Spelling } from '../music/theory'
+import { tonicTriadKind, TRIADS } from '../music/harmony'
 
 const MODES = ['Notes', 'Scales', 'Intervals', 'Practice'] as const
 type Mode = typeof MODES[number]
 const RANGES = [[0, 5], [0, 12], [6, 12], [13, 18], [19, 24], [0, 24]] as const
+const scaleLabels = ['Notes', 'Scale degrees'] as const
+const roleNames = { root: 'Tonic', third: 'Third', fifth: 'Perfect fifth' }
+
+function scaleNoteDetail(name: string, tonic: string, semitones: number, hasTriad: boolean) {
+  if (semitones === 0) return `${name} is the tonic, the home note. The scale starts again here in each octave.`
+  const distance = `${name} is ${semitones} ${semitones === 1 ? 'semitone' : 'semitones'} above ${tonic} within one octave.`
+  switch (semitones) {
+    case 3: return `${distance} This minor third gives the scale its minor sound.`
+    case 4: return `${distance} This major third gives the scale its major sound.`
+    case 7: return hasTriad ? `${distance} It completes the triad with the tonic and third.` : distance
+    case 10: return `${distance} Try moving up a whole step to the tonic.`
+    case 11: return `${distance} The next tonic is just a semitone away. This is called the leading note.`
+    default: return distance
+  }
+}
 
 export function Explorer() {
   const [mode, setMode] = useState<Mode>('Notes')
   const [root, setRoot] = useState(9)
   const [kind, setKind] = useState<ScaleKind>('minorPentatonic')
+  const [scaleLabel, setScaleLabel] = useState<(typeof scaleLabels)[number]>('Notes')
   const [spelling, setSpelling] = useState<Spelling>('common')
   const [range, setRange] = useState(0)
   const [selected, setSelected] = useState<Position | null>(null)
-  const scale = scaleNotes(root, kind, spelling)
+  const scale = scaleNotes(root, kind, spelling).map((note) => {
+    const interval = intervalFrom(root, note.pitch)
+    return { ...note, interval, symbol: degreeSymbol(note.degree, interval.semitones), role: toneKind(note.degree, interval.semitones) }
+  })
+  const triad = tonicTriadKind(SCALES[kind])
+  const triadNotes = triad ? scale.filter(({ degree }) => degree === 1 || degree === 3 || degree === 5) : []
+  const steps = scaleSteps(kind)
+  const hasLargerSteps = steps.some((step) => step > 2)
   const rootName = noteName(root, spelling)
   const [firstFret, lastFret] = RANGES[range]
   const pitch = selected ? pitchAt(selected) : null
@@ -29,10 +53,16 @@ export function Explorer() {
     const midi = pitchAt(position)
     const pc = pitchClass(midi)
     if (mode === 'Notes') return { label: noteName(pc, spelling) }
-    const style = pc === root ? 'root' as const : undefined
-    if (mode === 'Intervals') return { label: intervalFrom(root, pc).symbol, kind: style }
+    if (mode === 'Intervals') {
+      const { symbol, semitones } = intervalFrom(root, pc)
+      return { label: symbol, kind: toneKind(INTERVALS[semitones][2], semitones) }
+    }
     const match = scale.find((note) => note.pitch === pc)
-    return match ? { label: match.name, kind: style } : undefined
+    return match ? {
+      label: scaleLabel === 'Notes' ? match.name : match.symbol,
+      kind: match.role,
+      spokenLabel: `${positionName(position)}, ${match.name}, ${match.role === 'root' ? 'tonic' : match.interval.name.toLowerCase()} (${match.symbol})`,
+    } : undefined
   }
 
   return (
@@ -63,16 +93,27 @@ export function Explorer() {
           </div>
         </div>
         {mode === 'Practice' ? <FretboardPractice key={range} range={RANGES[range]} spelling={spelling} /> : <>
-          {mode === 'Scales' && <p className="explorer-guide">A <strong>scale</strong> is an ordered pattern of pitches. The <strong>tonic</strong> is its home note, marked with a lavender outline. Change the scale to see how its pattern puts different notes around the same tonic.</p>}
+          {mode === 'Scales' && <div className="scale-toolbar">
+            <div className="segmented scale-labels" role="group" aria-label="Scale fretboard labels">
+              {scaleLabels.map((label) => <button key={label} type="button" aria-pressed={scaleLabel === label} onClick={() => setScaleLabel(label)}>{label}</button>)}
+            </div>
+            <ul className="scale-legend" aria-label="Highlighted scale degrees">
+              {scale.map(({ role, symbol }) => role && <li key={symbol}><span className={`fret-note ${role}`}>{symbol}</span>{roleNames[role]}</li>)}
+            </ul>
+          </div>}
           {mode === 'Intervals' && <p className="explorer-guide">An <strong>interval</strong> is the distance between two pitches. Here the starting note {rootName} is marked 1. The labels repeat in each octave, so you can find the same relationship anywhere on the neck.</p>}
           <div className="board-caption"><span>Standard tuning</span><span aria-label="Thickest to thinnest, E, A, D, G, B, E">E A D G B E</span></div>
           <Fretboard key={range} range={RANGES[range]} selected={selected} onSelect={setSelected} marker={marker} />
           <div className="explorer-result">
-            <div aria-live="polite">
+            <div aria-live="polite" className={selectedScaleNote && mode === 'Scales' ? 'scale-selection' : undefined}>
               {selected && pitch !== null ? <>
                 <strong>{selectedName}<sub>{octaveOf(pitch, selectedName)}</sub></strong>
-                <span>{positionName(selected)}{selectedInterval && ` · ${selectedInterval.name}`}{mode === 'Scales' && ` · ${selectedScaleNote ? `Degree ${degreeSymbol(selectedScaleNote.degree, pitchClass(pitch - root))}` : 'Outside this scale'}`}</span>
-              </> : <span>Select a position to see its pitch and hear it.</span>}
+                {mode === 'Scales' && selectedScaleNote ? <>
+                  <span className="scale-interval">{selectedScaleNote.role === 'root' ? 'Tonic' : selectedScaleNote.interval.name} ({selectedScaleNote.symbol})</span>
+                  <span>{positionName(selected)}</span>
+                  <p>{scaleNoteDetail(selectedName, rootName, selectedScaleNote.interval.semitones, !!triad)}</p>
+                </> : <span>{positionName(selected)}{selectedInterval && ` · ${selectedInterval.name}`}{mode === 'Scales' && ' · Outside this scale'}</span>}
+              </> : <span>{mode === 'Scales' ? 'Tap a highlighted note to see how it relates to the tonic.' : 'Select a position to see its pitch and hear it.'}</span>}
             </div>
             {pitch !== null && <AudioButton pitches={[pitch]} label="Hear note" />}
           </div>
@@ -82,12 +123,25 @@ export function Explorer() {
             <p>A sharp raises a note by a semitone and a flat lowers it by a semitone. F♯ and G♭ are enharmonic names for the same pitch on this equal-tempered fretboard. A scale or chord determines which name makes sense on the page.</p>
           </details>}
           {mode === 'Scales' && <>
-            <div className="scale-strip" aria-label="Notes in this scale">{scale.map((note) => <span className={note.degree === 1 ? 'scale-root' : ''} key={note.pitch}>{note.name}</span>)}</div>
-            <p className="board-footnote">Degree formula {scale.map(({ pitch: pc, degree }) => degreeSymbol(degree, pitchClass(pc - root))).join('–')}</p>
+            <div className="scale-summary">
+              <h2>{rootName} {SCALES[kind].label.toLowerCase()}</h2>
+              <ul className="scale-strip" aria-label="Notes and degrees in this scale">
+                {scale.map(({ pitch: pc, name, role, symbol }) => <li key={pc} aria-current={selectedScaleNote?.pitch === pc ? 'true' : undefined}>
+                  <span aria-label={`Degree ${symbol}`}>{symbol}</span><strong className={`fret-note${role ? ` ${role}` : ''}`}>{name}</strong>
+                </li>)}
+              </ul>
+              <p className="scale-steps">{hasLargerSteps ? 'Steps in semitones' : 'Step pattern'} <strong>{steps.map((step) => hasLargerSteps ? step : step === 2 ? 'W' : 'H').join('–')}</strong></p>
+              {triad && <div className="scale-triad">
+                <p><strong>{triadNotes[0].name}, {triadNotes[1].name} and {triadNotes[2].name}</strong> form the {rootName} {TRIADS[triad].label} triad.</p>
+                <AudioButton pitches={triadNotes.map(({ interval }) => 48 + root + interval.semitones)} together label="Hear triad" />
+              </div>}
+            </div>
             <details className="explanation">
               <summary><CircleHelp size={17} /> How do the scale options differ?</summary>
-              <p>Major and natural minor each use seven notes with different gaps. Pentatonic means five notes. These two pentatonic scales keep five degrees from their corresponding seven-note scales.</p>
-              <p>Scale degrees count from the tonic. A ♭3 in the formula means a third one semitone lower than in the major scale on the same tonic. A note with that degree can still have a natural letter name.</p>
+              <p>A scale is an ordered pattern of pitches. The steps above measure the gaps between its notes, including the last step back to the tonic an octave higher. W is a whole step (two semitones) and H is a half step (one semitone).</p>
+              <p>Major and natural minor each use seven notes. Pentatonic means five notes. Major pentatonic leaves out 4 and 7 from the major scale. Minor pentatonic leaves out 2 and ♭6 from natural minor. Both have some gaps of three semitones.</p>
+              <p>Scale degrees describe intervals from the tonic. A ♭3 is a third one semitone lower than in the major scale on the same tonic. C is the second note of A minor pentatonic, but its degree is still ♭3.</p>
+              <p>A triad is a three-note chord. In these scales, you can build one on the tonic using degree 1, the third and the perfect fifth. Try hearing the triad, then listen to an individual scale note.</p>
               <p>Natural minor is the seven-note minor scale shown here. Harmonic minor raises its seventh. The ascending form of melodic minor raises both its sixth and seventh.</p>
               <p><strong>Note names</strong> lets you choose a tonic spelling such as F♯ or G♭. The scale’s other notes follow that spelling.</p>
             </details>

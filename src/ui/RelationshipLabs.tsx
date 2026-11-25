@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { degreeSymbol, INTERVALS, intervalNote, noteName, pitchAt, samePosition, SCALES, scaleNotes, scaleSteps, spellDegree, STRINGS, type Position, type StringIndex } from '../music/theory'
 import { AudioButton } from './AudioButton'
-import { Fretboard } from './Fretboard'
+import { Fretboard, toneKind } from './Fretboard'
 
 const intervalRange = [0, 7] as const
 const intervalRoots: readonly Position[] = [{ string: 4, fret: 3 }, { string: 5, fret: 5 }]
@@ -21,6 +21,7 @@ export function IntervalLab() {
   const rootPitch = pitchAt(root)
   const target = rootPitch + distance
   const targetName = intervalNote(rootPitch, distance, 'common', asFifth).name
+  const targetKind = toneKind(distance === 12 ? 8 : INTERVALS[distance][2], distance) ?? 'target'
   const positions = STRINGS.flatMap(({ midi }, string) => {
     const fret = target - midi
     return fret >= intervalRange[0] && fret <= intervalRange[1] ? [{ string: string as StringIndex, fret }] : []
@@ -57,7 +58,7 @@ export function IntervalLab() {
     </div>
     <Fretboard range={intervalRange} selected={note} reveal={note} onSelect={pick}
       marker={(position) => samePosition(root, position) ? { label: noteName(rootPitch), kind: 'root' }
-        : samePosition(note, position) ? { label: targetName, kind: 'target' } : undefined} />
+        : samePosition(note, position) ? { label: targetName, kind: targetKind } : undefined} />
     <div className="lab-result">
       <p role="status">{message || <><strong>{intervalName(distance)}</strong> · {distance} {distance === 1 ? 'semitone' : 'semitones'}</>}</p>
     </div>
@@ -109,7 +110,7 @@ export function ScaleLab() {
         {gaps.map((gap, index) => <span key={index} className={index < path.length - 1 ? 'is-filled' : ''} aria-current={index === path.length - 1 ? 'step' : undefined}>{gap === 2 ? 'W' : 'H'}</span>)}
       </div>
       <div className="lab-sequence" aria-label="Scale notes so far">
-        {notes.map(({ name, degree }, index) => <span key={index} className={index < path.length ? 'is-filled' : ''}>
+        {notes.map(({ name, degree }, index) => <span key={index} className={index < path.length ? `is-filled ${toneKind(degree, steps[index]) ?? ''}` : ''}>
           <small aria-label={`Degree ${degreeSymbol(degree, steps[index])}`}>{degreeSymbol(degree, steps[index])}</small>
           <strong className="scale-note-name">{index < path.length ? name : '·'}</strong>
         </span>)}
@@ -129,7 +130,7 @@ export function ScaleLab() {
       marker={(position) => {
         if (position.string !== dString) return undefined
         const index = path.indexOf(position.fret)
-        return index >= 0 ? { label: notes[index].name, kind: index === 0 ? 'root' : undefined } : undefined
+        return index >= 0 ? { label: notes[index].name, kind: toneKind(notes[index].degree, steps[index]) } : undefined
       }} />
     <div className="lab-choices"><AudioButton pitches={path.map((fret) => openD + fret)} label={complete ? 'Hear the scale' : 'Hear notes so far'} /></div>
   </div>

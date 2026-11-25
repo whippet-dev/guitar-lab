@@ -76,9 +76,16 @@ describe('note spelling, intervals and scales', () => {
   it('places each pentatonic note at its correct degree and transposes every scale', () => {
     expect(scaleNotes(9, 'minorPentatonic').map(({ name }) => name)).toEqual(['A', 'C', 'D', 'E', 'G'])
     expect(scaleNotes(0, 'majorPentatonic').map(({ degree }) => degree)).toEqual([1, 2, 3, 5, 6])
+    expect(scaleSteps('majorPentatonic')).toEqual([2, 2, 3, 2, 3])
+    expect(scaleSteps('minorPentatonic')).toEqual([3, 2, 2, 3, 2])
     for (const kind of Object.keys(SCALES) as ScaleKind[]) {
       for (let root = 0; root < 12; root++) {
-        expect(scaleNotes(root, kind).map(({ pitch }) => pitchClass(pitch - root))).toEqual(SCALES[kind].semitones)
+        const notes = scaleNotes(root, kind)
+        expect(notes.map(({ pitch }) => pitchClass(pitch - root))).toEqual(SCALES[kind].semitones)
+        for (const { pitch, degree } of notes) {
+          const interval = intervalFrom(root, pitch)
+          expect(interval.symbol).toBe(degreeSymbol(degree, interval.semitones))
+        }
       }
     }
   })

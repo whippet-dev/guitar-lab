@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { TRIADS, triadKind, triadNotes, triadVoicing } from './harmony'
+import { tonicTriadKind, TRIADS, triadKind, triadNotes, triadVoicing } from './harmony'
 import { chordsInMajorKey } from './progression'
+import { SCALES } from './theory'
 
 describe('triads and keys', () => {
   it('uses the third and fifth to distinguish the four qualities and spell the chord', () => {
@@ -20,5 +21,12 @@ describe('triads and keys', () => {
     expect(triadVoicing(48, 4, 7, 0)).toEqual([48, 52, 55])
     expect(triadVoicing(48, 4, 7, 1)).toEqual([52, 55, 60])
     expect(triadVoicing(48, 4, 7, 2)).toEqual([55, 60, 64])
+  })
+
+  it('finds a triad by degree and quality when a scale contains all three tones', () => {
+    expect(Object.values(SCALES).map(tonicTriadKind)).toEqual(['major', 'minor', 'major', 'minor'])
+    expect(tonicTriadKind({ degrees: [1, 2, 3, 4, 5], semitones: [0, 2, 3, 5, 6] })).toBe('diminished')
+    expect(tonicTriadKind({ degrees: [1, 2, 4, 5], semitones: [0, 2, 5, 7] })).toBeUndefined()
+    expect(tonicTriadKind({ degrees: [1, 3, 4, 6], semitones: [0, 4, 5, 9] })).toBeUndefined()
   })
 })

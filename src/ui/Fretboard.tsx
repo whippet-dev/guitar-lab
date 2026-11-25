@@ -1,8 +1,15 @@
 import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, type KeyboardEvent, type Ref } from 'react'
 import { MAX_FRET, noteName, pitchAt, positionName, samePosition, STRINGS, type Position, type StringIndex } from '../music/theory'
 
-type Marker = { label: string; kind?: 'root' | 'target'; spokenLabel?: string }
+type ToneKind = 'root' | 'third' | 'fifth'
+type Marker = { label: string; kind?: ToneKind | 'target'; spokenLabel?: string }
 export type FretboardView = { visibleRange: () => readonly [number, number] }
+
+export function toneKind(degree: number, semitones: number): ToneKind | undefined {
+  if (degree === 1 || (degree === 8 && semitones === 12)) return 'root'
+  if (degree === 3 && (semitones === 3 || semitones === 4)) return 'third'
+  if (degree === 5 && semitones === 7) return 'fifth'
+}
 
 type FretboardProps = {
   range?: readonly [number, number]

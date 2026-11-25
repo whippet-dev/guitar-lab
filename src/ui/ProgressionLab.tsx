@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { chordsInMajorKey } from '../music/progression'
 import { noteName, pitchAt, pitchClass, samePosition, scaleNotes, type Position } from '../music/theory'
 import { AudioButton } from './AudioButton'
-import { Fretboard } from './Fretboard'
+import { Fretboard, toneKind } from './Fretboard'
 
 const ranges = [0, 5] as const
 const keys = [48, 43, 50, 53]
@@ -46,14 +46,14 @@ export function ProgressionLab() {
       </button>)}
     </div>
     <div className="lab-result">
-      <p className="lab-instruction">Lavender outlines mark the current chord tones.</p>
+      <p className="lab-instruction">Lavender marks the chord root, teal the third and amber the perfect fifth.</p>
       <AudioButton pitches={chord.pitches} together label="Hear this chord" />
     </div>
     <Fretboard range={ranges} selected={selected} onSelect={setSelected} marker={(position) => {
       const midi = pitchAt(position)
       const pc = pitchClass(midi)
-      const member = chord.notes.find((note) => note.pitch === pc)
-      if (member) return { label: member.name, kind: 'root' }
+      const memberIndex = chord.notes.findIndex((note) => note.pitch === pc)
+      if (memberIndex >= 0) return { label: chord.notes[memberIndex].name, kind: toneKind(1 + memberIndex * 2, chord.pitches[memberIndex] - chord.pitches[0]) }
       const inKey = scale.find((note) => note.pitch === pc)
       if (inKey || samePosition(selected, position)) return { label: inKey?.name ?? noteName(midi, 'common') }
     }} />
