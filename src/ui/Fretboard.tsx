@@ -2,7 +2,7 @@ import { useEffect, useImperativeHandle, useRef, useState, type CSSProperties, t
 import { MAX_FRET, noteName, pitchAt, positionName, samePosition, STRINGS, type Position, type StringIndex } from '../music/theory'
 
 type ToneKind = 'root' | 'third' | 'fifth'
-type Marker = { label: string; kind?: ToneKind | 'target'; spokenLabel?: string }
+type Marker = { label: string; kind?: ToneKind | 'target'; spokenLabel?: string; comparison?: 'shared' | 'neighbour' }
 export type FretboardView = { visibleRange: () => readonly [number, number] }
 
 export function toneKind(degree: number, semitones: number): ToneKind | undefined {
@@ -129,7 +129,7 @@ export function Fretboard({ range = [0, MAX_FRET], selected, selectedPositions, 
                       aria-label={mark?.spokenLabel ?? `${positionName(position)}${mark ? `, ${mark.label}` : ''}`}
                       aria-pressed={pressed} aria-disabled={locked || undefined} tabIndex={cursor.string === string && activeFret === fret ? 0 : -1}
                       onFocus={() => setCursor(position)} onKeyDown={(event) => moveFocus(event, position)} onClick={() => { if (!locked) onSelect(position) }}>
-                      {mark && <span className={`fret-note ${mark.kind ?? ''}`}>{mark.label}</span>}
+                      {mark && <span className={`fret-note${mark.kind ? ` ${mark.kind}` : ''}${mark.comparison ? ` is-${mark.comparison}` : ''}`}>{mark.label}</span>}
                     </button>
                   )
                 })}

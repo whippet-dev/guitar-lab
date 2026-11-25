@@ -267,8 +267,12 @@ h1:focus, main:focus { outline: none; }
 .fret-note.root { border-width: 2px; }
 .fret-note.third { border-radius: 7px; }
 .fret-note.fifth { border-style: dashed; }
+.fret-note.is-neighbour { opacity: .72; background: #201b28; border-style: dotted; }
+.fret-note.is-shared { box-shadow: 0 0 0 2px #282035, 0 0 0 3px #b8a5d2; }
 .fret-note.target, .fret-cell.is-selected .fret-note { color: var(--tone-text, var(--accent-ink)); border-color: var(--tone-edge, var(--accent)); background: var(--tone-surface, var(--accent)); }
 .fret-cell.is-selected .fret-note:is(.root, .third, .fifth) { outline: 1px solid #ede3fb; outline-offset: 2px; }
+.fret-cell.is-selected .fret-note.is-shared { outline-offset: 4px; }
+.shape-tab { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
 .explorer-result { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 7px 12px; min-height: 52px; margin-top: 9px; }
 .explorer-result > div:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .explorer-result strong { font-size: 1.36rem; color: var(--accent); }

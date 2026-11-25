@@ -4,19 +4,20 @@ import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
 import { LISTENING_EXERCISES, LISTENING_TOPIC } from './listening'
 import { RHYTHM_EXERCISES, RHYTHM_TOPIC } from './rhythm'
+import { SHAPE_EXERCISES, SHAPE_TOPICS } from './playing'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm' | 'caged' | 'voicings'
 
 export type Topic = {
   id: TopicId
-  group?: 'Scales and intervals' | 'Harmony in action' | 'Listening and timing'
+  group?: 'Scales and intervals' | 'Harmony in action' | 'Listening and timing' | 'Play it on guitar'
   title: string
   description: string
   intro: string
   detail: string
   task: string
   taskPositions: readonly Position[]
-} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' })
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' | 'caged' | 'voicings' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -50,6 +51,7 @@ export const TOPICS: readonly Topic[] = [
   ...HARMONY_TOPICS,
   LISTENING_TOPIC,
   RHYTHM_TOPIC,
+  ...SHAPE_TOPICS,
 ]
 
 type Answer =
@@ -130,6 +132,7 @@ export const EXERCISES: readonly Exercise[] = [
   ...HARMONY_EXERCISES,
   ...LISTENING_EXERCISES,
   ...RHYTHM_EXERCISES,
+  ...SHAPE_EXERCISES,
 ]
 
 export function findTopic(id: string) {

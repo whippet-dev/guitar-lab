@@ -10,7 +10,8 @@
 | Pentatonics | Major and minor pentatonic, position connections and root locations | Move a phrase between positions | Explorer preview |
 | Chords | Build major, minor, diminished and augmented triads and compare inversions by ear | Hear how changing a chord tone or the bass changes the sound | Guided lesson and practice |
 | Keys and changes | Compare chords made from one major scale, using key and progression controls | Test the same melody note against changing chords | Guided lesson and practice |
-| CAGED | Five movable shapes, roots and overlapping positions | Connect rhythm and lead playing in a familiar key | Planned |
+| CAGED | Compare five movable forms with their open shapes and find shared frets | Find the same chord up the neck | Guided lesson and practice |
+| Voicings | Compare triad inversions on adjacent strings | Play the same chord with a different bass or top note | Guided lesson and practice |
 | Listening | Match a heard note to the fretboard and compare a guess to the target | Hum and find small intervals by ear | Guided lesson and practice |
 | Rhythm | Place notes on beats and offbeats in a playable one-bar pattern | Leave space in a phrase while keeping the same pulse | Guided lesson and practice |
 | Practical lead | Motifs, phrasing, space and resolving notes | Improvise over simple changes | Planned |
