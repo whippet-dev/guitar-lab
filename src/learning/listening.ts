@@ -28,3 +28,30 @@ export const LISTENING_EXERCISES: readonly PositionExercise[] = [
     hint: 'This jump is seven semitones. In this range, look at the D string or near the fifth fret of the A string.',
     why: 'G up to D is a perfect fifth, just like E up to B. The starting notes are different and the distance is the same.' },
 ]
+
+export const PHRASE_EAR_TOPIC: Topic = {
+  id: 'phrase-ear', group: 'Listening and timing', activity: 'phrase-ear', title: 'Hear a phrase find its home',
+  description: 'Compare major and minor sounds, follow a falling phrase and hear a note resolve over a chord.',
+  intro: 'Listen before opening the fretboard. Compare the two rising sounds and hum the middle note of each. Then try the falling phrase and the example with a chord underneath.',
+  detail: 'Rising and falling describe pitch direction. Both rising examples start on A and end on E, a perfect fifth above it. One passes through C, the minor third, and the other through C♯, the major third. In the chord example B steps down to A. The tension is part of the phrase, and the bass gives the ear a place to settle.',
+  task: 'Hum E–C–A so the line settles on A. Try it on the D and A strings, then play the same shape two frets higher. The pitches change, but the direction and gaps stay the same.',
+  taskPositions: [{ string: 3, fret: 2 }, { string: 4, fret: 3 }, { string: 4, fret: 0 }],
+}
+
+export const PHRASE_EAR_EXERCISES: readonly PositionExercise[] = [
+  { id: 'phrase-ear-minor-ending', topic: 'phrase-ear', range: [0, 5], anchor: { string: 4, fret: 0 },
+    prompt: 'Hear A jump up to E, then move down. Find the final note on the fretboard.',
+    listen: [{ string: 4, fret: 0 }, { string: 3, fret: 2 }, { string: 4, fret: 3 }],
+    hint: 'The phrase ends on the minor third of A, three frets up the A string.',
+    why: 'The last note is C. A and E frame the phrase, while C gives it the minor sound.', answer: { kind: 'pitch', midi: 48 } },
+  { id: 'phrase-ear-major-ending', topic: 'phrase-ear', range: [0, 5], anchor: { string: 4, fret: 0 },
+    prompt: 'This phrase shares the same A and E. Match the higher third at the end.',
+    listen: [{ string: 4, fret: 0 }, { string: 3, fret: 2 }, { string: 4, fret: 4 }],
+    hint: 'The major third of A lies four frets above open A. Compare it with the fret just below.',
+    why: 'C♯ is one semitone above C. That change gives the same frame of A and E a major sound.', answer: { kind: 'pitch', midi: 49 } },
+  { id: 'phrase-ear-fall-home', topic: 'phrase-ear', range: [0, 5], anchor: { string: 3, fret: 2 },
+    prompt: 'Follow this falling phrase and find the note it settles on.',
+    listen: [{ string: 3, fret: 2 }, { string: 4, fret: 3 }, { string: 4, fret: 0 }],
+    hint: 'The notes descend through the minor third of A. The final pitch is the open A string.',
+    why: 'The line goes E, C, A. It ends on the root of the A minor triad, giving the phrase a sense of arrival.', answer: { kind: 'pitch', midi: 45 } },
+]

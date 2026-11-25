@@ -15,7 +15,7 @@ describe('exercise content and feedback', () => {
     const answer = solutionFor(exercise)
     expect(isCorrect(exercise, answer)).toBe(true)
     expect(feedbackFor(exercise, answer)).toBe(exercise.why)
-    if (exercise.listen) expect(isCorrect(exercise, exercise.listen[1])).toBe(true)
+    if (exercise.listen) expect(isCorrect(exercise, exercise.listen.at(-1)!)).toBe(true)
   })
 
   it.each(EXERCISES.filter((exercise) => exercise.kind === 'chord'))('finds playable chord tones for $id and accepts them in either order', (exercise) => {
@@ -118,6 +118,21 @@ describe('daily practice and progress', () => {
     progress = saveSessionResponse(progress, 'one', 'open-low-e', { result: 'correct', position: { string: 5, fret: 0 } }, 4)
     expect(progress.attempts.map(({ result }) => result)).toEqual(['retry'])
     expect(advanceSession(progress, 'one', 1, 5).session?.step).toBe(2)
+  })
+
+  it('reviews chord changes ahead of the phrase checks and retains a resumed session', () => {
+    let progress = EMPTY_PROGRESS
+    const beforePhrasing = TOPICS.slice(0, TOPICS.findIndex(({ id }) => id === 'phrasing'))
+    for (const topic of beforePhrasing) {
+      for (const exercise of EXERCISES.filter((item) => item.topic === topic.id).slice(0, 2)) {
+        progress = addAttempt(progress, exercise.id, 'correct', day)
+      }
+    }
+    const session = planSession(progress, 'lead-practice', day + 1)
+    expect(session.topic).toBe('phrasing')
+    expect(session.exercises.map((id) => findExercise(id)?.topic)).toEqual(['changes', 'phrasing', 'phrasing'])
+    expect(session.exercises.slice(1)).toEqual(['phrase-land-f', 'phrase-offbeat-answer'])
+    expect(parseProgress(JSON.stringify({ ...progress, session })).session).toEqual(session)
   })
 
   it('rejects stale responses and records completing a session only once', () => {

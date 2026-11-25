@@ -74,6 +74,7 @@ export function CagedLab() {
       {comparison.length > 0 && ` The faded markers add the neighbouring ${next.form.name} form${index === 4 ? ' an octave above the first form' : ''}.`}</p>
     <p className="shape-tab">Thick to thin {form.frets.map((fret) => fret === null ? '×' : fret + (open ? 0 : shift)).join(' · ')}</p>
     <ChordFretboard key={`${root}-${index}-${placement}`} root={actualRoot} quality="major" positions={positions} comparison={comparison} />
+    <a className="back-link" href="#learn/voicings">Try a smaller shape on three strings</a>
   </div>
 }
 

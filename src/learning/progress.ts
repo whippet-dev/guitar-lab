@@ -28,6 +28,7 @@ export type Progress = {
 export const EMPTY_PROGRESS: Progress = { version: 1, attempts: [], lessons: [], sessionsCompleted: 0, session: null }
 export const SESSION_MINUTES = 5
 const DAY = 86_400_000
+const relatedReview: Partial<Record<TopicId, TopicId>> = { caged: 'triads', voicings: 'caged', pentatonic: 'scales', phrasing: 'changes', 'phrase-ear': 'listening' }
 
 export function topicProgress(progress: Progress, topic: TopicId) {
   const attempts = progress.attempts.filter(({ exercise }) => findExercise(exercise)?.topic === topic)
@@ -58,7 +59,7 @@ export function planSession(progress: Progress, id: string, now: number): Sessio
     .map((exercise) => exercise.id)
   const focusPrompts = promptsFor(focus.topic)
   const overdue = review.find((skill) => skill !== focus && (now - skill.lastAt >= 7 * DAY || (skill.misses > 0 && now - skill.lastAt >= 2 * DAY)))
-  const revisit = overdue ?? skills[focusIndex - 1]
+  const revisit = overdue ?? skills.find(({ topic }) => topic === relatedReview[focus.topic]) ?? skills[focusIndex - 1]
   const exercises = revisit ? [promptsFor(revisit.topic)[0], ...focusPrompts.slice(0, 2)] : focusPrompts.slice(0, 3)
 
   return { id, topic: focus.topic, exercises, step: 0, responses: {}, completedAt: null }

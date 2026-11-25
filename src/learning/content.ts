@@ -2,11 +2,11 @@ import type { Position, ScaleKind, StringIndex } from '../music/theory'
 import type { TriadKind } from '../music/harmony'
 import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
-import { LISTENING_EXERCISES, LISTENING_TOPIC } from './listening'
+import { LISTENING_EXERCISES, LISTENING_TOPIC, PHRASE_EAR_EXERCISES, PHRASE_EAR_TOPIC } from './listening'
 import { RHYTHM_EXERCISES, RHYTHM_TOPIC } from './rhythm'
 import { PENTATONIC_EXERCISES, PENTATONIC_TOPIC, PHRASE_EXERCISES, PHRASE_TOPIC, SHAPE_EXERCISES, SHAPE_TOPICS } from './playing'
 
-export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' | 'phrasing'
+export type TopicId = 'landmarks' | 'semitones' | 'octaves' | 'intervals' | 'scales' | 'triads' | 'changes' | 'listening' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' | 'phrasing' | 'phrase-ear'
 
 export type Topic = {
   id: TopicId
@@ -17,7 +17,7 @@ export type Topic = {
   detail: string
   task: string
   taskPositions: readonly Position[]
-} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' | 'phrasing' })
+} & ({ activity?: undefined; demo: [Position, Position]; demoLabels: [string, string] } | { activity: 'intervals' | 'scales' | 'triads' | 'changes' | 'rhythm' | 'caged' | 'voicings' | 'pentatonic' | 'phrasing' | 'phrase-ear' })
 
 export const TOPICS: readonly Topic[] = [
   {
@@ -54,6 +54,7 @@ export const TOPICS: readonly Topic[] = [
   ...SHAPE_TOPICS,
   PENTATONIC_TOPIC,
   PHRASE_TOPIC,
+  PHRASE_EAR_TOPIC,
 ]
 
 type Answer =
@@ -70,7 +71,7 @@ type ExercisePrompt = {
   why: string
 }
 
-export type PositionExercise = ExercisePrompt & { kind?: undefined; range: [number, number]; string?: StringIndex; anchor?: Position; listen?: readonly [Position, Position]; scale?: { tonic: number; kind: ScaleKind }; answer: Answer }
+export type PositionExercise = ExercisePrompt & { kind?: undefined; range: [number, number]; string?: StringIndex; anchor?: Position; listen?: readonly [Position, Position, ...Position[]]; scale?: { tonic: number; kind: ScaleKind }; answer: Answer }
 export type ChordExercise = ExercisePrompt & { kind: 'chord'; range: [number, number]; root: Position; quality: TriadKind }
 export type RhythmExercise = ExercisePrompt & { kind: 'rhythm'; slots: readonly number[] }
 export type Exercise = PositionExercise | ChordExercise | RhythmExercise
@@ -137,6 +138,7 @@ export const EXERCISES: readonly Exercise[] = [
   ...SHAPE_EXERCISES,
   ...PENTATONIC_EXERCISES,
   ...PHRASE_EXERCISES,
+  ...PHRASE_EAR_EXERCISES,
 ]
 
 export function findTopic(id: string) {

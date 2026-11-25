@@ -12,7 +12,7 @@
 | Keys and changes | Compare chords made from one major scale, using key and progression controls | Test the same melody note against changing chords | Guided lesson and practice |
 | CAGED | Compare five movable forms with their open shapes and find shared frets | Find the same chord up the neck | Guided lesson and practice |
 | Voicings | Compare triad inversions on adjacent strings | Play the same chord with a different bass or top note | Guided lesson and practice |
-| Listening | Match a heard note to the fretboard and compare a guess to the target | Hum and find small intervals by ear | Guided lesson and practice |
+| Listening | Compare chord quality, melodic direction and the final note of a phrase | Hum and find notes by ear, then hear how they settle against a chord | Guided lesson and practice |
 | Rhythm | Place notes on beats and offbeats in a playable one-bar pattern | Leave space in a phrase while keeping the same pulse | Guided lesson and practice |
 | Practical lead | Repeat and vary a motif, choose rests, and compare landing notes against changing chords | Write and hear a two-bar lead phrase | Guided lesson and practice |
 

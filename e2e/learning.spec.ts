@@ -143,6 +143,19 @@ test('compares a listening guess with the target and offers a silent hint', asyn
   await expect(page.getByText('You’ve heard and found a minor third.', { exact: false })).toBeVisible()
 })
 
+test('reveals a listening example and checks the final pitch of a three-note phrase', async ({ page }) => {
+  await page.goto('./#learn/phrase-ear')
+  await page.getByRole('button', { name: 'Major', exact: true }).click()
+  await page.getByText('See the notes on the fretboard').click()
+  await expect(page.getByRole('button', { name: 'B string, fret 2, C♯', exact: true })).toBeVisible()
+  await page.getByRole('link', { name: 'Try an exercise' }).click()
+  await page.getByRole('button', { name: 'D string, fret 2', exact: true }).click()
+  await expect(page.getByText('Try another position.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Hear target, then your note' })).toBeVisible()
+  await page.getByRole('button', { name: 'A string, fret 3', exact: true }).click()
+  await expect(page.getByText('The last note is C.', { exact: false })).toBeVisible()
+})
+
 test('plays an editable bar and checks notes against the beat', async ({ page }) => {
   await page.goto('./#learn/rhythm')
   const board = page.locator('[aria-label="Rhythm board"]')

@@ -122,5 +122,6 @@ export function PhraseLab() {
       return { label: note.name, kind: role >= 0 ? toneKind(role * 2 + 1, pitchClass(pc - chord.pitches[0])) : undefined,
         spokenLabel: `${positionName(position)}, ${note.name}${role >= 0 ? `, ${roleNames[role]} of ${chord.label}` : ''}` }
     }} />
+    <a className="back-link" href="#learn/phrase-ear">Listen for where a phrase lands</a>
   </div>
 }

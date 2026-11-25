@@ -71,5 +71,6 @@ export function PentatonicLab() {
       {active && <AudioButton pitches={[pitchAt(active)]} label="Hear note" />}
     </div>
     {overlap && !tonesOnly && <p className="lab-instruction">Try {crossing.map(({ fret }) => fret).join('–')} on the {STRINGS[crossingString].name} string. The middle fret belongs to both positions.</p>}
+    <a className="back-link" href="#learn/phrasing">Use chord tones in a lead phrase</a>
   </div>
 }
