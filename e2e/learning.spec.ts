@@ -384,3 +384,22 @@ test('keeps the guitar sound preference and both audio banks available offline',
   await expect(instrument).toHaveValue('acoustic')
   for (const url of samples) expect(await page.evaluate(async (path) => (await fetch(path)).ok, url)).toBe(true)
 })
+
+test('requests media playback on a tap and releases the audio session in the background', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'audioSession', { configurable: true, value: { type: 'auto' } })
+  })
+  await page.goto('./#sound')
+  await page.getByRole('combobox', { name: 'Instrument', exact: true }).selectOption('reference')
+  const audioSession = () => page.evaluate(() => (navigator as Navigator & { audioSession: { type: string } }).audioSession.type)
+
+  expect(await audioSession()).toBe('auto')
+  await page.getByRole('button', { name: 'Try sound', exact: true }).click()
+  expect(await audioSession()).toBe('playback')
+
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, value: true })
+    document.dispatchEvent(new Event('visibilitychange'))
+  })
+  expect(await audioSession()).toBe('auto')
+})

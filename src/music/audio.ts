@@ -12,9 +12,25 @@ let mixer: Mixer | undefined
 let voices: Voice[] = []
 let playback = 0
 let removeAbortListener: (() => void) | undefined
-let bank: { instrument: Guitar; context: AudioContext; buffer: Promise<AudioBuffer | undefined> } | undefined
+let bank: { instrument: Guitar; context: AudioContext; pending: Promise<AudioBuffer | undefined>; decoded?: AudioBuffer } | undefined
+
+function setAudioSession(type: 'auto' | 'playback') {
+  try {
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
+    if (session && session.type !== type) session.type = type
+  } catch {
+    // The audio graph still works on browsers without a writable AudioSession.
+  }
+}
+
+function closeMixer() {
+  const previous = mixer?.context
+  mixer = undefined
+  if (previous && previous.state !== 'closed') void previous.close().catch(() => {})
+}
 
 function getMixer(): Mixer {
+  if (String(mixer?.context.state) === 'interrupted') closeMixer()
   if (!mixer || mixer.context.state === 'closed') {
     const context = new AudioContext({ latencyHint: 'interactive' })
     const output = context.createDynamicsCompressor()
@@ -30,20 +46,27 @@ function getMixer(): Mixer {
 }
 
 function loadBank(context: AudioContext, instrument: Guitar) {
-  if (bank?.instrument === instrument && bank.context === context) return bank.buffer
-  const buffer = fetch(SAMPLE_BANKS[instrument].url)
+  if (bank?.instrument === instrument) {
+    if (bank.decoded) return Promise.resolve(bank.decoded)
+    if (bank.context === context) return bank.pending
+  }
+  const pending = fetch(SAMPLE_BANKS[instrument].url)
     .then((response) => {
       if (!response.ok) throw new Error('Guitar samples could not be loaded.')
       return response.arrayBuffer()
     })
     .then((bytes) => context.decodeAudioData(bytes))
+    .then((decoded) => {
+      if (bank?.pending === pending) bank.decoded = decoded
+      return decoded
+    })
     .catch(() => {
-      if (bank?.buffer === buffer) bank = undefined
+      if (bank?.pending === pending) bank = undefined
       return undefined
     })
   // Retain just the most recently used decoded guitar bank.
-  bank = { instrument, context, buffer }
-  return buffer
+  bank = { instrument, context, pending }
+  return pending
 }
 
 function withTimeout<T>(pending: Promise<T>, delay: number, fallback: T) {
@@ -76,6 +99,12 @@ export function stopAudio() {
     }
   }
   voices = []
+}
+
+export function releaseAudioOutput() {
+  stopAudio()
+  closeMixer()
+  setAudioSession('auto')
 }
 
 function scheduleVoice({ context, output }: Mixer, note: TimedNote, start: number, guitar?: { instrument: Guitar; buffer: AudioBuffer }) {
@@ -126,6 +155,8 @@ export async function playTimedNotes(notes: readonly TimedNote[], options: Playb
   const { signal } = options
   const selected = options.reference ? 'reference' : getInstrument()
   const instrument = selected !== 'reference' && notes.some(({ voice }) => !voice) ? selected : undefined
+  // iOS treats Web Audio as ambient by default, which follows the Silent Mode switch.
+  setAudioSession('playback')
   const audio = getMixer()
   const { context } = audio
   // Resume directly in the gesture handler, ahead of any fetch or decode.
@@ -139,8 +170,9 @@ export async function playTimedNotes(notes: readonly TimedNote[], options: Playb
   const [ready, buffer] = await Promise.all([resumed, samples])
   if (request !== playback) return 'cancelled'
   if (!ready || context.state !== 'running') {
-    stopAudio()
-    throw new Error('Audio is unavailable in this browser.')
+    // Start with a fresh output on the next tap if iOS could not resume this one.
+    releaseAudioOutput()
+    throw new Error('Audio could not start.')
   }
   const guitar = instrument && buffer ? { instrument, buffer } : undefined
   const start = context.currentTime + 0.018

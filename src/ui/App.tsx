@@ -6,7 +6,7 @@ import { newId, useProgress } from '../learning/useProgress'
 import { DailyPractice, ExerciseView, Lesson, Library, ProgressView } from './Learning'
 import { Explorer } from './Explorer'
 import { SoundSettings } from './SoundSettings'
-import { stopAudio } from '../music/audio'
+import { releaseAudioOutput, stopAudio } from '../music/audio'
 import heroImage from '../assets/fretboard-hero.webp'
 
 const NAVIGATION = [
@@ -105,13 +105,13 @@ export function App() {
 
   useEffect(() => {
     const navigate = () => { stopAudio(); setRoute(currentRoute()) }
-    const onVisibility = () => { if (document.hidden) stopAudio() }
+    const onVisibility = () => { if (document.hidden) releaseAudioOutput() }
     window.addEventListener('hashchange', navigate)
-    window.addEventListener('pagehide', stopAudio)
+    window.addEventListener('pagehide', releaseAudioOutput)
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       window.removeEventListener('hashchange', navigate)
-      window.removeEventListener('pagehide', stopAudio)
+      window.removeEventListener('pagehide', releaseAudioOutput)
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [])

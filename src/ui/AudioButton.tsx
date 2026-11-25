@@ -28,7 +28,7 @@ export function AudioButton({ label, reference, strum, ...playback }: { label: s
   return (
     <div className="audio-control">
       <button className="button button-secondary" type="button" onClick={play} aria-busy={status === 'loading' || undefined}><Volume2 size={17} />{label}</button>
-      {status === 'unavailable' && <span role="status" className="muted">Audio is unavailable in this browser.</span>}
+      {status === 'unavailable' && <span role="status" className="muted">{typeof AudioContext === 'undefined' ? 'Audio is unavailable in this browser.' : 'Audio could not start. Tap again to retry.'}</span>}
       {status === 'fallback' && <span role="status" className="muted">Playing the reference tone.</span>}
     </div>
   )
