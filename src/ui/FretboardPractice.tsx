@@ -82,7 +82,7 @@ export function FretboardPractice({ range, spelling }: { range: readonly [number
       </div>
       <div className="practice-prompt" aria-live="polite" aria-atomic="true">
         <h2>{askingForPosition ? (question ? `Where is ${targetName}?` : 'Find a note') : 'What note is highlighted?'}</h2>
-        {askingForPosition ? <p className="practice-instruction">Tap any position that plays this note.</p> : <p>{question && `${drillLocation(question)}. `}<span className="practice-instruction">Choose the note name.</span></p>}
+        {askingForPosition ? <p className="practice-instruction">Tap a position for this note, in any octave.</p> : <p>{question && `${drillLocation(question)}. `}<span className="practice-instruction">Choose the note name.</span></p>}
       </div>
       <Fretboard range={range} viewRef={board} onSelect={choosePosition} selected={askingForPosition ? feedback?.position : null} marker={marker}
         locked={!askingForPosition || answered} label={!askingForPosition ? 'Guitar fretboard with the marked position.' : undefined} />

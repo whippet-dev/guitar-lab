@@ -3,7 +3,7 @@ import { CircleHelp, Guitar } from 'lucide-react'
 import { Fretboard } from './Fretboard'
 import { FretboardPractice } from './FretboardPractice'
 import { AudioButton } from './AudioButton'
-import { intervalFrom, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, type Position, type ScaleKind, type Spelling } from '../music/theory'
+import { degreeSymbol, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, type Position, type ScaleKind, type Spelling } from '../music/theory'
 
 const MODES = ['Notes', 'Scales', 'Intervals', 'Practice'] as const
 type Mode = typeof MODES[number]
@@ -21,7 +21,9 @@ export function Explorer() {
   const [firstFret, lastFret] = RANGES[range]
   const pitch = selected ? pitchAt(selected) : null
   const selectedScaleNote = scale.find((note) => pitch !== null && note.pitch === pitchClass(pitch))
-  const selectedName = pitch === null ? '' : (mode === 'Scales' && selectedScaleNote?.name) || noteName(pitch, spelling)
+  const selectedInterval = mode === 'Intervals' && pitch !== null ? intervalFrom(root, pitch) : undefined
+  const selectedName = pitch === null ? '' : selectedInterval ? intervalNote(root, selectedInterval.semitones, spelling).name
+    : (mode === 'Scales' && selectedScaleNote?.name) || noteName(pitch, spelling)
 
   function marker(position: Position) {
     const midi = pitchAt(position)
@@ -46,7 +48,7 @@ export function Explorer() {
             {MODES.map((option) => <button key={option} type="button" aria-pressed={mode === option} onClick={() => setMode(option)}>{option}</button>)}
           </div>
           <div className="select-controls">
-            {(mode === 'Scales' || mode === 'Intervals') && <label>Root<select value={root} onChange={(event) => setRoot(Number(event.target.value))}>
+            {(mode === 'Scales' || mode === 'Intervals') && <label>{mode === 'Scales' ? 'Tonic' : 'Starting note'}<select value={root} onChange={(event) => setRoot(Number(event.target.value))}>
               {Array.from({ length: 12 }, (_, pc) => <option key={pc} value={pc}>{noteName(pc, spelling)}</option>)}
             </select></label>}
             {mode === 'Scales' && <label>Scale<select value={kind} onChange={(event) => setKind(event.target.value as ScaleKind)}>
@@ -61,29 +63,36 @@ export function Explorer() {
           </div>
         </div>
         {mode === 'Practice' ? <FretboardPractice key={range} range={RANGES[range]} spelling={spelling} /> : <>
-          {mode === 'Scales' && <p className="explorer-guide">A <strong>scale</strong> is a set of notes arranged from low to high. The <strong>root</strong> is its home note, marked with a lavender outline. Choose a <strong>scale</strong> to change which notes light up. Major and natural minor use seven notes. Pentatonic scales use five.</p>}
-          {mode === 'Intervals' && <p className="explorer-guide">An <strong>interval</strong> is the distance between two notes. Choose a <strong>root</strong> as your starting note, shown as 1. Tap another position to see its interval from {rootName} within one octave.</p>}
-          <div className="board-caption"><span>Standard tuning</span><span>E A D G B E</span></div>
+          {mode === 'Scales' && <p className="explorer-guide">A <strong>scale</strong> is an ordered pattern of pitches. The <strong>tonic</strong> is its home note, marked with a lavender outline. Change the scale to see how its pattern puts different notes around the same tonic.</p>}
+          {mode === 'Intervals' && <p className="explorer-guide">An <strong>interval</strong> is the distance between two pitches. Here the starting note {rootName} is marked 1. The labels repeat in each octave, so you can find the same relationship anywhere on the neck.</p>}
+          <div className="board-caption"><span>Standard tuning</span><span aria-label="Thickest to thinnest, E, A, D, G, B, E">E A D G B E</span></div>
           <Fretboard key={range} range={RANGES[range]} selected={selected} onSelect={setSelected} marker={marker} />
           <div className="explorer-result">
             <div aria-live="polite">
               {selected && pitch !== null ? <>
                 <strong>{selectedName}<sub>{octaveOf(pitch, selectedName)}</sub></strong>
-                <span>{positionName(selected)}{mode === 'Intervals' && ` · ${intervalFrom(root, pitch).name}`}{mode === 'Scales' && ` · ${selectedScaleNote ? `Degree ${selectedScaleNote.degree}` : 'Outside this scale'}`}</span>
+                <span>{positionName(selected)}{selectedInterval && ` · ${selectedInterval.name}`}{mode === 'Scales' && ` · ${selectedScaleNote ? `Degree ${degreeSymbol(selectedScaleNote.degree, pitchClass(pitch - root))}` : 'Outside this scale'}`}</span>
               </> : <span>Select a position to see its pitch and hear it.</span>}
             </div>
             {pitch !== null && <AudioButton pitches={[pitch]} label="Hear note" />}
           </div>
+          {mode === 'Notes' && <details className="explanation">
+            <summary><CircleHelp size={17} /> Why do some notes have two names?</summary>
+            <p>A pitch is a particular highness or lowness of sound. Low E is E2 and high E is E4. They are different pitches in the same pitch class, E.</p>
+            <p>A sharp raises a note by a semitone and a flat lowers it by a semitone. F♯ and G♭ are enharmonic names for the same pitch on this equal-tempered fretboard. A scale or chord determines which name makes sense on the page.</p>
+          </details>}
           {mode === 'Scales' && <>
             <div className="scale-strip" aria-label="Notes in this scale">{scale.map((note) => <span className={note.degree === 1 ? 'scale-root' : ''} key={note.pitch}>{note.name}</span>)}</div>
+            <p className="board-footnote">Degree formula {scale.map(({ pitch: pc, degree }) => degreeSymbol(degree, pitchClass(pc - root))).join('–')}</p>
             <details className="explanation">
               <summary><CircleHelp size={17} /> How do the scale options differ?</summary>
-              <p>Major and natural minor each use seven notes. The gaps between those notes are different, which gives each scale its sound. Pentatonic means five notes. Each pentatonic scale takes five notes from its seven-note version.</p>
-              <p>A degree is a note’s place in the seven-note scale, counting the root as 1. The pentatonic versions keep the degree numbers of the notes they use.</p>
-              <p>Use <strong>Note names</strong> to choose how to write the root, such as F♯ or G♭. The rest of the scale is spelled to fit that root.</p>
+              <p>Major and natural minor each use seven notes with different gaps. Pentatonic means five notes. These two pentatonic scales keep five degrees from their corresponding seven-note scales.</p>
+              <p>Scale degrees count from the tonic. A ♭3 in the formula means a third one semitone lower than in the major scale on the same tonic. A note with that degree can still have a natural letter name.</p>
+              <p>Natural minor is the seven-note minor scale shown here. Harmonic minor raises its seventh. The ascending form of melodic minor raises both its sixth and seventh.</p>
+              <p><strong>Note names</strong> lets you choose a tonic spelling such as F♯ or G♭. The scale’s other notes follow that spelling.</p>
             </details>
           </>}
-          {mode === 'Intervals' && <p className="board-footnote"><strong>How to read the numbers.</strong> A 5 is a perfect fifth, seven frets above the root on the same string. A ♭3 is a minor third, one fret smaller than a 3 (major third).</p>}
+          {mode === 'Intervals' && <p className="board-footnote"><strong>How to read the numbers.</strong> A 5 is a perfect fifth, seven semitones. A ♭3 is a minor third, three semitones. The ♯4 marks a tritone, which can also be written as a diminished fifth (♭5). Tap a position to see the note spelled from the chosen starting note.</p>}
         </>}
         {lastFret - firstFret > 6 && <p className="board-footnote">{mode === 'Practice'
           ? 'Swipe or scroll to a different part of the neck, then tap Next note to practise there.'

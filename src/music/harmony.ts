@@ -8,6 +8,7 @@ export const TRIADS = {
 } as const
 
 export type TriadKind = keyof typeof TRIADS
+export type TriadInversion = 0 | 1 | 2
 
 export function triadKind(third: number, fifth: number) {
   return (Object.keys(TRIADS) as TriadKind[]).find((kind) => TRIADS[kind].third === third && TRIADS[kind].fifth === fifth)
@@ -19,4 +20,9 @@ export function triadNotes(root: number, third: number, fifth: number, spelling:
 
 export function chordPitches(root: number, extras: readonly number[]) {
   return [root, ...extras.map((pitch) => root + pitchClass(pitch - root)).sort((a, b) => a - b)]
+}
+
+export function triadVoicing(root: number, third: number, fifth: number, inversion: TriadInversion) {
+  const pitches = [root, root + third, root + fifth]
+  return [...pitches.slice(inversion), ...pitches.slice(0, inversion).map((pitch) => pitch + 12)]
 }

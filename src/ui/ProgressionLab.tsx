@@ -26,6 +26,8 @@ export function ProgressionLab() {
   const pitch = selectedPitch === undefined ? undefined : pitchClass(selectedPitch)
   const selectedRole = chord.notes.findIndex((note) => note.pitch === pitch)
   const keyNote = scale.find((note) => note.pitch === pitch)
+  const topChordPitch = chord.pitches[chord.pitches.length - 1]
+  const leadPitch = selectedPitch === undefined ? undefined : selectedPitch + 12 * Math.max(0, Math.floor((topChordPitch - selectedPitch) / 12) + 1)
 
   return <div className="music-lab" aria-label="Chord changes workshop">
     <div className="lab-controls">
@@ -56,11 +58,12 @@ export function ProgressionLab() {
       if (inKey || samePosition(selected, position)) return { label: inKey?.name ?? noteName(midi, 'common') }
     }} />
     <div className="lab-result">
-      <p role="status"><strong>{chord.label}</strong> · {selectedPitch === undefined ? `${chord.notes.map(({ name }) => name).join(', ')} are the chord tones. Tap a note to try it.`
+      <p role="status"><strong>{chord.label}</strong> · {selectedPitch === undefined ? `${chord.notes.map(({ name }) => name).join(', ')} are the chord tones. Tap a note to hear how it fits.`
         : selectedRole >= 0 ? `${chord.notes[selectedRole].name} is the ${roleNames[selectedRole]} of this chord.`
-        : keyNote ? `${keyNote.name} is in the key, outside this chord. Try moving from it to a marked chord tone.`
-        : `${noteName(selectedPitch, 'common')} is outside this key. Hear the tension, then try a nearby note in the key.`}</p>
-      {selectedPitch !== undefined && <AudioButton pitches={[...chord.pitches, selectedPitch]} together label="Hear your note with the chord" />}
+        : keyNote ? `${keyNote.name} is in the key, outside this chord. Hear how it sounds, then try moving it to a chord tone.`
+        : `${noteName(selectedPitch, 'common')} is outside this key. Compare its colour with a nearby note in the key.`}</p>
+      {leadPitch !== undefined && <AudioButton pitches={[...chord.pitches, leadPitch]} together label="Hear your note over the chord" />}
     </div>
+    {leadPitch !== undefined && leadPitch !== selectedPitch && <p className="lab-instruction">Playback lifts your note by octaves so you can hear it above the chord.</p>}
   </div>
 }

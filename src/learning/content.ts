@@ -1,4 +1,4 @@
-import type { Position, StringIndex } from '../music/theory'
+import type { Position, ScaleKind, StringIndex } from '../music/theory'
 import type { TriadKind } from '../music/harmony'
 import { RELATIONSHIP_EXERCISES, RELATIONSHIP_TOPICS } from './relationships'
 import { HARMONY_EXERCISES, HARMONY_TOPICS } from './harmony'
@@ -22,17 +22,17 @@ export const TOPICS: readonly Topic[] = [
   {
     id: 'landmarks', title: 'Your first landmarks',
     description: 'Use open strings and the 12th fret to get your bearings.',
-    intro: 'Start with a string you already know. The thickest string is low E. Play it open, then try the same string at fret 12. You’ll hear another E, an octave higher. That gives you two places on the neck to find your bearings.',
-    detail: 'The same thing happens on every string. At fret 12, half of the string’s open vibrating length remains. That doubles the frequency and gives you the same note name in a higher octave.',
+    intro: 'Start on the thickest string, low E. Play it open, without pressing a fret, then try fret 12. You’ll hear another E, an octave higher. Fret 0 means the open string on this board.',
+    detail: 'This works on every string. At fret 12, about half the open string’s vibrating length remains. The pitch is an octave higher, with twice the frequency and the same note name.',
     demo: [{ string: 5, fret: 0 }, { string: 5, fret: 12 }], demoLabels: ['Open low E', 'Low E at fret 12'],
-    task: 'Listen to the open A string and its 12th fret. The second note is higher. Can you hum it back and still hear it as the same note? Try a few times, then find both positions in the explorer or on your guitar.',
+    task: 'Listen to open A and A at fret 12. Hum the two pitches back if you can. They share a note name, an octave apart. Find both positions in the explorer or on your guitar.',
     taskPositions: [{ string: 4, fret: 0 }, { string: 4, fret: 12 }],
   },
   {
     id: 'semitones', title: 'One fret at a time',
     description: 'Use semitone steps to find notes close to a landmark.',
-    intro: 'Each fret raises the pitch by a semitone. Try the open low E and then fret 1. You’ve moved from E straight to F. The same one-fret move takes you from B to C.',
-    detail: 'The other neighbouring natural notes are two frets apart. The fret between F and G, for example, can be called F sharp or G flat. Both names describe the same pitch on a guitar.',
+    intro: 'Moving up one fret on a string raises its pitch by one semitone (a half step). Try open low E and fret 1, E to F. B to C is also a semitone. Two semitones make a tone (a whole step).',
+    detail: 'All the other pairs of neighbouring natural notes are a tone apart. A sharp raises a note by a semitone and a flat lowers it by a semitone. The fret between F and G sounds the same whether you call it F♯ or G♭. These are enharmonic spellings, and the music tells you which one to use.',
     demo: [{ string: 5, fret: 0 }, { string: 5, fret: 1 }], demoLabels: ['Open low E', 'F at fret 1'],
     task: 'Listen to E, F and G on the thickest string at frets 0, 1 and 3. Hum the three notes back and listen for the smaller step from E to F. Then see if you can find and play the phrase in the explorer or on your guitar.',
     taskPositions: [{ string: 5, fret: 0 }, { string: 5, fret: 1 }, { string: 5, fret: 3 }],
@@ -41,7 +41,7 @@ export const TOPICS: readonly Topic[] = [
     id: 'octaves', title: 'Move a phrase up an octave',
     description: 'Carry a fretted note or a short phrase into a higher register.',
     intro: 'The open strings gave you a starting point. The same rule works from any fret. Find G on the low E string at fret 3. Add 12 frets and you reach another G at fret 15, an octave higher.',
-    detail: 'An octave contains 12 semitones. The frets get physically closer together up the neck, but each fret still represents the same musical step. Moving a shape by 12 frets on the same strings keeps its note names.',
+    detail: 'An octave spans 12 semitones. The frets get closer together up the neck, and each still represents one semitone. G2 and G3 are different pitches in the same pitch class, G. A pitch class groups pitches that are octaves apart.',
     demo: [{ string: 5, fret: 3 }, { string: 5, fret: 15 }], demoLabels: ['G at fret 3', 'G at fret 15'],
     task: 'Listen to a phrase on the low E string at frets 0, 1 and 3, then hear it again at 12, 13 and 15. Hum along and notice what stays the same. Try both versions in the explorer or on your guitar.',
     taskPositions: [0, 1, 3, 12, 13, 15].map((fret) => ({ string: 5, fret })),
@@ -66,7 +66,7 @@ type ExercisePrompt = {
   why: string
 }
 
-export type PositionExercise = ExercisePrompt & { kind?: undefined; range: [number, number]; string?: StringIndex; anchor?: Position; listen?: readonly [Position, Position]; answer: Answer }
+export type PositionExercise = ExercisePrompt & { kind?: undefined; range: [number, number]; string?: StringIndex; anchor?: Position; listen?: readonly [Position, Position]; scale?: { tonic: number; kind: ScaleKind }; answer: Answer }
 export type ChordExercise = ExercisePrompt & { kind: 'chord'; range: [number, number]; root: Position; quality: TriadKind }
 export type RhythmExercise = ExercisePrompt & { kind: 'rhythm'; slots: readonly number[] }
 export type Exercise = PositionExercise | ChordExercise | RhythmExercise
@@ -104,7 +104,7 @@ export const EXERCISES: readonly Exercise[] = [
   },
   {
     id: 'b-to-c', topic: 'semitones', prompt: 'Start from the open B string. Find C on that string.',
-    hint: 'B and C are next to each other in the chromatic scale, just like E and F.',
+    hint: 'B to C is a semitone, just like E to F. Move one fret up from open B.',
     why: 'B to C takes one semitone, so fret 1 on the B string gives you C.',
     range: [0, 5], string: 1, answer: { kind: 'note', pitchClass: 0 },
   },

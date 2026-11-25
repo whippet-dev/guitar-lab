@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Play } from 'lucide-react'
 import { playGroups } from '../music/audio'
-import { rhythmDifference, slotName } from '../learning/rhythm'
+import { rhythmDifference, secondsPerQuaver, slotName } from '../learning/rhythm'
 import type { RhythmExercise } from '../learning/content'
 import type { RhythmResponse } from '../learning/progress'
 
@@ -31,14 +31,14 @@ export function RhythmLab({ check }: { check?: Check }) {
   async function play() {
     const request = ++playRequest.current
     clearInterval(clock.current)
-    const eighth = 30 / tempo
+    const quaver = secondsPerQuaver(tempo)
     const bar = Array.from({ length: 8 }, (_, slot) => [
       ...(slot % 2 === 0 ? [slot === 0 ? 88 : 83] : []),
       ...(slots.includes(slot) ? [50] : []),
     ])
     let unavailable = false
     try {
-      await playGroups(bar, eighth, 0.16)
+      await playGroups(bar, quaver, 0.16)
     } catch {
       unavailable = true
     }
@@ -47,7 +47,7 @@ export function RhythmLab({ check }: { check?: Check }) {
     setActive(0)
     const start = performance.now()
     clock.current = setInterval(() => {
-      const slot = Math.floor((performance.now() - start) / (eighth * 1000))
+      const slot = Math.floor((performance.now() - start) / (quaver * 1000))
       if (slot >= 8) {
         clearInterval(clock.current)
         setActive(null)
@@ -77,8 +77,8 @@ export function RhythmLab({ check }: { check?: Check }) {
   return <div className="music-lab" aria-label="Rhythm board">
     {!check ? <div className="lab-choices" role="group" aria-label="Rhythm examples">
       {presets.map((pattern) => <button type="button" className="button button-secondary" key={pattern.label} onClick={() => setSlots(pattern.slots)}>{pattern.label}</button>)}
-    </div> : <p className="lab-instruction">Tap a box to place or remove a note. Play the bar whenever you want to hear your pattern.</p>}
-    <div className="rhythm-grid" role="group" aria-label="One bar of four beats">
+    </div> : <p className="lab-instruction">Tap a box to choose when a note starts. Play the bar to hear your pattern against a steady click.</p>}
+    <div className="rhythm-grid" role="group" aria-label="One bar in four-four, divided into quavers">
       {beats.map((beat, group) => <div className="rhythm-beat" key={beat}>
         {[beat, beat + 1].map((slot) => <button type="button" key={slot} className={`button rhythm-pad${active === slot ? ' is-current' : ''}`}
           aria-label={slotName(slot)} aria-pressed={slots.includes(slot)} aria-disabled={finished || undefined} onClick={() => toggle(slot)}>

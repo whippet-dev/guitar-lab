@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { frequencyOf, intervalFrom, MAX_FRET, noteName, octaveOf, pitchAt, pitchClass, SCALES, scaleNotes, STRINGS, type ScaleKind, type StringIndex } from './theory'
+import { degreeSymbol, frequencyOf, intervalFrom, intervalNote, MAX_FRET, noteName, octaveOf, pitchAt, pitchClass, SCALES, scaleNotes, scaleSteps, STRINGS, type ScaleKind, type StringIndex } from './theory'
 
 describe('standard guitar tuning and the fretboard', () => {
   it('maps string numbers to the correct sounding notes and octaves', () => {
@@ -40,7 +40,24 @@ describe('note spelling, intervals and scales', () => {
   it('identifies intervals relative to a root across a pitch-class boundary', () => {
     expect(intervalFrom(11, 6)).toEqual({ semitones: 7, symbol: '5', name: 'Perfect fifth' })
     expect(intervalFrom(9, 0).name).toBe('Minor third')
-    expect(intervalFrom(40, 52).name).toBe('Root')
+    expect(intervalFrom(40, 52).name).toBe('Starting note')
+  })
+
+  it('spells intervals by letter as well as by pitch, including both tritone spellings', () => {
+    expect(intervalNote(48, 1, 'sharps').name).toBe('D♭')
+    expect(intervalNote(48, 6)).toEqual({ pitch: 6, name: 'F♯', degree: 4 })
+    expect(intervalNote(48, 6, 'common', true)).toEqual({ pitch: 6, name: 'G♭', degree: 5 })
+    expect(intervalNote(61, 4).name).toBe('E♯')
+    expect(intervalNote(48, 12).degree).toBe(8)
+  })
+
+  it('builds the taught D scales from the correct step patterns and parallel-major degrees', () => {
+    expect(scaleSteps('major')).toEqual([2, 2, 1, 2, 2, 2, 1])
+    expect(scaleSteps('minor')).toEqual([2, 1, 2, 2, 1, 2, 2])
+    expect(scaleNotes(2, 'major').map(({ name }) => name)).toEqual(['D', 'E', 'F♯', 'G', 'A', 'B', 'C♯'])
+    expect(scaleNotes(2, 'minor').map(({ name }) => name)).toEqual(['D', 'E', 'F', 'G', 'A', 'B♭', 'C'])
+    expect(SCALES.minor.semitones.map((offset, index) => degreeSymbol(index + 1, offset))).toEqual(['1', '2', '♭3', '4', '5', '♭6', '♭7'])
+    expect(SCALES.minorPentatonic.semitones.map((offset, index) => degreeSymbol(SCALES.minorPentatonic.degrees[index], offset))).toEqual(['1', '♭3', '4', '5', '♭7'])
   })
 
   it('uses diatonic spelling for major and minor scales', () => {

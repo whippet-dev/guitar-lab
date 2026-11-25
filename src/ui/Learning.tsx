@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, CircleHelp, Clock
 import { useEffect, useRef, useState } from 'react'
 import { noteName, octaveOf, pitchAt, positionName, samePosition, type Position } from '../music/theory'
 import { EXERCISES, TOPICS, findExercise, findTopic, type Exercise, type PositionExercise, type Topic } from '../learning/content'
-import { feedbackFor, isCorrect, solutionFor } from '../learning/exercise'
+import { exerciseNoteName, feedbackFor, isCorrect, solutionFor } from '../learning/exercise'
 import { SESSION_MINUTES, topicProgress, type Progress, type PositionResponse, type Response, type Session } from '../learning/progress'
 import { Fretboard, noteMarker } from './Fretboard'
 import { AudioButton } from './AudioButton'
@@ -94,8 +94,8 @@ function PositionCheck({ exercise, response, onResponse }: {
         <AudioButton pitches={listening} label="Hear the two notes" />
       </div> : <p className="teaching-copy">Tap a position on the fretboard.</p>}
       <Fretboard range={exercise.range} guideString={exercise.string} selected={response?.position} onSelect={submit} locked={finished}
-        reveal={reveal ?? response?.position ?? anchor} marker={(position) => samePosition(response?.position, position) ? noteMarker(position, finished ? 'target' : undefined)
-          : samePosition(anchor, position) ? noteMarker(position, 'root') : undefined} />
+        reveal={reveal ?? response?.position ?? anchor} marker={(position) => samePosition(response?.position, position) ? { label: exerciseNoteName(exercise, position), kind: finished ? 'target' : undefined }
+          : samePosition(anchor, position) ? { label: exerciseNoteName(exercise, position), kind: 'root' } : undefined} />
       <div className="exercise-feedback" aria-live="polite" role="status">
         {response && <div className={`feedback-box ${finished ? 'is-finished' : ''}`}>
           {response.result === 'correct' ? <Check size={20} /> : <Lightbulb size={20} />}
@@ -187,7 +187,7 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
 
   if (!session) return <section className="panel lesson-panel learning-layout">
     <div className="eyebrow"><Clock3 size={17} /> About {SESSION_MINUTES} min</div>
-    <h1 tabIndex={-1} ref={heading}>Daily practice</h1><p>Start with a short demonstration and try the idea on the fretboard.</p>
+    <h1 tabIndex={-1} ref={heading}>Daily practice</h1><p>Start with a short demonstration, then try the idea in a few exercises.</p>
     <button className="button button-primary" type="button" onClick={onStart}>Start daily practice<ArrowRight size={19} /></button>
   </section>
 
@@ -207,7 +207,7 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
         <div className="eyebrow">{completed ? <Check size={18} /> : <BookOpen size={17} />}{completed ? 'Daily practice' : exercise ? exerciseLabel(exercise) : session.step === 0 ? 'Short lesson' : 'Put it into practice'}</div>
         <h1 tabIndex={-1} ref={heading}>{title}</h1>
         {completed ? <>
-          <p className="teaching-copy">You worked on {topic.title.toLowerCase()}. Your answers will help choose what to revisit in your next session.</p>
+          <p className="teaching-copy">Today’s focus was “{topic.title}”. Your answers will help choose what to revisit next time.</p>
           <div className="learning-actions"><a className="button button-primary" href="#today">Back to Today<ArrowRight size={19} /></a><a className="button button-secondary" href="#fretboard">Open fretboard</a></div>
         </> : <>
           {session.step === 0 && <LessonBody key={session.id} topic={topic} />}
@@ -218,7 +218,7 @@ export function DailyPractice({ session, onStart, onAdvance, onResponse }: {
           </>}
           {(!exercise || (response && response.result !== 'retry')) && <div className="learning-actions">
             <button className="button button-primary" type="button" onClick={() => onAdvance(session)}>{session.step === 0 ? 'Start exercises' : session.step === total - 1 ? 'Finish practice' : 'Continue'}<ArrowRight size={19} /></button>
-            {session.step === total - 1 && <a href="#fretboard" className="button button-secondary">Try it in the explorer</a>}
+            {session.step === total - 1 && <a href={topic.activity ? `#learn/${topic.id}` : '#fretboard'} className="button button-secondary">{topic.activity ? 'Return to the demonstration' : 'Try it in the explorer'}</a>}
           </div>}
         </>}
       </section>
@@ -241,7 +241,7 @@ export function ProgressView({ progress }: { progress: Progress }) {
           const status = topicProgress(progress, topic.id)
           return <a key={topic.id} className="library-row" href={`#learn/${topic.id}`} aria-labelledby={`progress-${topic.id}`}>
             <span className="card-icon">{status.established ? <Check size={21} /> : <BookOpen size={21} />}</span>
-            <div><h3 id={`progress-${topic.id}`}>{topic.title}</h3><p>{status.established ? 'Finding notes confidently' : status.attempted ? 'Worth another look' : progress.lessons.includes(topic.id) ? 'Lesson explored' : 'Ready to explore'}</p></div>
+            <div><h3 id={`progress-${topic.id}`}>{topic.title}</h3><p>{status.established ? (topic.group ? 'Recent checks going well' : 'Finding notes confidently') : status.attempted ? 'Worth another look' : progress.lessons.includes(topic.id) ? 'Lesson explored' : 'Ready to explore'}</p></div>
             <span className="icon-link"><ChevronRight size={23} /></span>
           </a>
         })}

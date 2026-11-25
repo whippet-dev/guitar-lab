@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { EXERCISES, TOPICS, findExercise } from './content'
-import { chordSolution, feedbackFor, isChordCorrect, isCorrect, solutionFor } from './exercise'
+import { chordSolution, exerciseNoteName, feedbackFor, isChordCorrect, isCorrect, solutionFor } from './exercise'
 import { advanceSession, EMPTY_PROGRESS, parseProgress, planSession, recordAttempt, saveSessionResponse, topicProgress, type Progress, type Result } from './progress'
-import { rhythmDifference } from './rhythm'
+import { rhythmDifference, secondsPerQuaver } from './rhythm'
 
 const day = 86_400_000
 
@@ -28,6 +28,16 @@ describe('exercise content and feedback', () => {
   it('checks rhythm slots independent of tap order and catches a misplaced first beat', () => {
     expect(rhythmDifference([0, 2, 4, 6], [6, 2, 0, 4])).toEqual({ missing: undefined, extra: undefined })
     expect(rhythmDifference([0, 2, 4, 6], [1, 2, 4, 6])).toEqual({ missing: 0, extra: 1 })
+    expect(secondsPerQuaver(80)).toBe(0.375)
+    expect(secondsPerQuaver(120)).toBe(0.25)
+  })
+
+  it('spells scale feedback in context and distinguishes an octave error from a different note', () => {
+    const scale = findExercise('scale-d-minor-third')!
+    const ear = findExercise('ear-d-major-third')!
+    if (scale.kind !== undefined || ear.kind !== undefined) throw new Error('Expected position exercises')
+    expect(exerciseNoteName(scale, { string: 4, fret: 1 })).toBe('B♭')
+    expect(feedbackFor(ear, { string: 0, fret: 2 })).toContain('right note name in a higher octave')
   })
 
   it('distinguishes the required string, note name and exact octave', () => {

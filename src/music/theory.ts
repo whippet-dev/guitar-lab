@@ -62,6 +62,17 @@ export const SCALES = {
 
 export type ScaleKind = keyof typeof SCALES
 
+export function scaleSteps(kind: ScaleKind) {
+  const offsets = [...SCALES[kind].semitones, 12]
+  return offsets.slice(1).map((offset, index) => offset - offsets[index])
+}
+
+export function degreeSymbol(degree: number, offset: number) {
+  const majorOffset = degree === 8 ? 12 : SCALES.major.semitones[degree - 1]
+  const difference = offset - majorOffset
+  return `${difference < 0 ? '♭'.repeat(-difference) : '♯'.repeat(difference)}${degree}`
+}
+
 export function spellDegree(root: number, degree: number, offset: number, spelling: Spelling = 'common') {
   const rootLetter = letters.indexOf(noteName(root, spelling)[0])
   const letter = (rootLetter + degree - 1) % letters.length
@@ -77,13 +88,18 @@ export function scaleNotes(root: number, kind: ScaleKind, spelling: Spelling = '
 }
 
 export const INTERVALS = [
-  ['1', 'Root'], ['♭2', 'Minor second'], ['2', 'Major second'], ['♭3', 'Minor third'],
-  ['3', 'Major third'], ['4', 'Perfect fourth'], ['♯4', 'Tritone'], ['5', 'Perfect fifth'],
-  ['♭6', 'Minor sixth'], ['6', 'Major sixth'], ['♭7', 'Minor seventh'], ['7', 'Major seventh'],
+  ['1', 'Starting note', 1], ['♭2', 'Minor second', 2], ['2', 'Major second', 2], ['♭3', 'Minor third', 3],
+  ['3', 'Major third', 3], ['4', 'Perfect fourth', 4], ['♯4', 'Tritone', 4], ['5', 'Perfect fifth', 5],
+  ['♭6', 'Minor sixth', 6], ['6', 'Major sixth', 6], ['♭7', 'Minor seventh', 7], ['7', 'Major seventh', 7],
 ] as const
 
 export function intervalFrom(root: number, note: number) {
   const semitones = pitchClass(note - root)
   const [symbol, name] = INTERVALS[semitones]
   return { semitones, symbol, name }
+}
+
+export function intervalNote(root: number, distance: number, spelling: Spelling = 'common', asDiminishedFifth = false) {
+  const degree = distance === 12 ? 8 : distance === 6 && asDiminishedFifth ? 5 : INTERVALS[pitchClass(distance)][2]
+  return spellDegree(root, degree, distance, spelling)
 }

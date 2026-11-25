@@ -1,4 +1,4 @@
-import { noteName, pitchAt, pitchClass, positionName, samePosition, STRINGS, type Position, type StringIndex } from '../music/theory'
+import { intervalNote, noteName, pitchAt, pitchClass, samePosition, scaleNotes, STRINGS, type Position, type StringIndex } from '../music/theory'
 import type { ChordExercise, PositionExercise } from './content'
 import { TRIADS } from '../music/harmony'
 
@@ -21,14 +21,30 @@ export function solutionFor(exercise: PositionExercise): Position {
   throw new Error(`No valid position in the range for ${exercise.id}`)
 }
 
+export function exerciseNoteName(exercise: PositionExercise, position: Position) {
+  const midi = pitchAt(position)
+  if (exercise.scale) {
+    const { tonic, kind } = exercise.scale
+    const scaleNote = scaleNotes(tonic, kind, 'common').find((note) => note.pitch === pitchClass(midi))
+    if (scaleNote) return scaleNote.name
+  }
+  if (exercise.topic === 'intervals' && exercise.anchor) {
+    const start = pitchAt(exercise.anchor)
+    return intervalNote(start, pitchClass(midi - start)).name
+  }
+  return noteName(midi, 'common')
+}
+
 export function feedbackFor(exercise: PositionExercise, position: Position) {
   if (isCorrect(exercise, position)) return exercise.why
-  const pitch = noteName(pitchAt(position))
-  const location = positionName(position)
+  const pitch = exerciseNoteName(exercise, position)
   if (exercise.string !== undefined && position.string !== exercise.string) {
-    return `You found ${pitch} at ${location.toLowerCase()}. Try again on the ${STRINGS[exercise.string].name} string.`
+    return `You found ${pitch}. Try again on the ${STRINGS[exercise.string].name} string.`
   }
   if (exercise.answer.kind === 'tones') return `That’s ${pitch}. ${exercise.hint}`
+  if (exercise.answer.kind === 'pitch' && pitchClass(pitchAt(position)) === pitchClass(exercise.answer.midi)) {
+    return `That’s the right note name in ${pitchAt(position) > exercise.answer.midi ? 'a higher' : 'a lower'} octave. Match the exact pitch this time.`
+  }
   if (exercise.listen) return `That’s ${pitch}. Hear the target and your note side by side, then adjust your choice.`
   if (exercise.anchor) {
     const distance = pitchAt(position) - pitchAt(exercise.anchor)

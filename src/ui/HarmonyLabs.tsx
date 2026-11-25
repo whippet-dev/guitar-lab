@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { chordPitches, TRIADS, triadKind, triadNotes } from '../music/harmony'
+import { chordPitches, TRIADS, triadKind, triadNotes, triadVoicing, type TriadInversion } from '../music/harmony'
 import { noteName, pitchAt, pitchClass, samePosition, type Position } from '../music/theory'
+import { CircleHelp } from 'lucide-react'
 import type { ChordExercise } from '../learning/content'
 import { chordSolution, isChordCorrect } from '../learning/exercise'
 import type { ChordResponse } from '../learning/progress'
@@ -14,12 +15,13 @@ export function TriadLab() {
   const [root, setRoot] = useState(chordRoots[0])
   const [third, setThird] = useState(4)
   const [fifth, setFifth] = useState(7)
+  const [inversion, setInversion] = useState<TriadInversion>(0)
   const [selected, setSelected] = useState<Position | null>(null)
   const kind = triadKind(third, fifth)
   const notes = triadNotes(root, third, fifth)
-  const chord = kind ? `${notes[0].name} ${TRIADS[kind].label}` : `${notes[0].name} with a ${third === 3 ? 'minor' : 'major'} third and a ${fifth === 6 ? 'lowered' : 'raised'} fifth`
+  const chord = kind ? `${notes[0].name} ${TRIADS[kind].label}` : `${notes[0].name} with a ${third === 3 ? 'minor' : 'major'} third and ${fifth === 6 ? 'a diminished' : 'an augmented'} fifth`
   const active = selected && notes.find((note) => note.pitch === pitchClass(pitchAt(selected)))
-  const pitches = [root, root + third, root + fifth]
+  const pitches = triadVoicing(root, third, fifth, inversion)
 
   return <div className="music-lab" aria-label="Triad workshop">
     <div className="lab-controls">
@@ -30,19 +32,27 @@ export function TriadLab() {
         <option value={3}>Minor · 3</option><option value={4}>Major · 4</option>
       </select></label>
       <label className="lab-select">Fifth<select value={fifth} onChange={(event) => { setFifth(Number(event.target.value)); setSelected(null) }}>
-        <option value={6}>Lowered · 6</option><option value={7}>Perfect · 7</option><option value={8}>Raised · 8</option>
+        <option value={6}>Diminished · 6</option><option value={7}>Perfect · 7</option><option value={8}>Augmented · 8</option>
       </select></label>
     </div>
+    <p className="lab-instruction">The numbers are semitones above the root.</p>
     <div className="lab-chord" aria-label="Chord notes">
       {notes.map(({ degree, name }) => <span key={degree}><strong>{name}</strong>{degree === 1 ? 'Root' : degree === 3 ? 'Third' : 'Fifth'}</span>)}
     </div>
+    <details className="explanation">
+      <summary><CircleHelp size={17} /> What if another note is lowest?</summary>
+      <p>The root names the chord. The bass is its lowest sounding note. Listen to the same three notes rearranged.</p>
+      <label className="lab-select">Bass note<select value={inversion} onChange={(event) => setInversion(Number(event.target.value) as TriadInversion)}>
+        <option value={0}>Root position · {notes[0].name}</option><option value={1}>First inversion · {notes[1].name}</option><option value={2}>Second inversion · {notes[2].name}</option>
+      </select></label>
+    </details>
     <div className="lab-choices"><AudioButton pitches={pitches} together label="Hear the chord" /><AudioButton pitches={pitches} label="Hear notes separately" /></div>
     <Fretboard range={fretRange} selected={selected} onSelect={setSelected} marker={(position) => {
       const note = notes.find(({ pitch }) => pitch === pitchClass(pitchAt(position)))
       return note ? { label: note.name, kind: note.degree === 1 ? 'root' : undefined } : undefined
     }} />
     <div className="lab-result">
-      <p role="status"><strong>{chord}</strong>{selected && (active ? ` · ${active.name} is the ${active.degree === 1 ? 'root' : active.degree === 3 ? 'third' : 'fifth'}.` : ` · ${noteName(pitchAt(selected), 'common')} sits outside the chord.`)}</p>
+      <p role="status"><strong>{chord}</strong>{inversion > 0 && ` · ${notes[inversion].name} in the bass`}{selected && (active ? ` · ${active.name} is the ${active.degree === 1 ? 'root' : active.degree === 3 ? 'third' : 'fifth'}.` : ` · ${noteName(pitchAt(selected), 'common')} sits outside the chord.`)}</p>
     </div>
   </div>
 }
@@ -86,7 +96,7 @@ export function ChordCheck({ exercise, response, onResponse }: { exercise: Chord
   }
 
   return <div className="music-lab" aria-label="Build a triad">
-    <p className="lab-instruction">The root is marked. Choose two other notes anywhere on the board. Tap a chosen note again to remove it.</p>
+    <p className="lab-instruction">The root is marked. Add the third and fifth in any octave. Tap a chosen note again to remove it. Playback puts the notes together with the root in the bass.</p>
     <div className="lab-chord" aria-label="Your chord">
       {pitches.map((pitch, index) => <span key={pitch}><strong>{toneName(pitch)}</strong>{index === 0 ? 'Root' : 'Chosen note'}</span>)}
       {Array.from({ length: 3 - pitches.length }, (_, index) => <span key={`empty-${index}`}><strong>·</strong>Choose a note</span>)}
