@@ -1,0 +1,42 @@
+{
+  "electric": [
+    {"midi": 40, "start": 0.0, "duration": 3.65, "cents": 1.62},
+    {"midi": 41, "start": 3.695, "duration": 3.65, "cents": 0.92},
+    {"midi": 45, "start": 7.39, "duration": 3.65, "cents": 12.49},
+    {"midi": 48, "start": 11.085, "duration": 3.65, "cents": 0.91},
+    {"midi": 50, "start": 14.78, "duration": 3.65, "cents": 1.42},
+    {"midi": 52, "start": 18.475, "duration": 3.65, "cents": 6.96},
+    {"midi": 55, "start": 22.17, "duration": 3.65, "cents": -0.69},
+    {"midi": 59, "start": 25.865, "duration": 3.65, "cents": 1.61},
+    {"midi": 61, "start": 29.56, "duration": 3.65, "cents": 0.53},
+    {"midi": 64, "start": 33.255, "duration": 3.65, "cents": -0.61},
+    {"midi": 67, "start": 36.95, "duration": 3.65, "cents": -0.74},
+    {"midi": 71, "start": 40.645, "duration": 3.65, "cents": 1.46},
+    {"midi": 72, "start": 44.34, "duration": 3.65, "cents": -0.25},
+    {"midi": 74, "start": 48.035, "duration": 3.65, "cents": 4.59},
+    {"midi": 77, "start": 51.73, "duration": 3.65, "cents": 2.02},
+    {"midi": 80, "start": 55.425, "duration": 3.65, "cents": 1.42},
+    {"midi": 82, "start": 59.12, "duration": 3.65, "cents": 0.55},
+    {"midi": 85, "start": 62.815, "duration": 3.65, "cents": -0.35}
+  ],
+  "acoustic": [
+    {"midi": 40, "start": 0.0, "duration": 3.65, "cents": 4.92},
+    {"midi": 43, "start": 3.695, "duration": 3.65, "cents": 12.91},
+    {"midi": 45, "start": 7.39, "duration": 3.65, "cents": 2.72},
+    {"midi": 48, "start": 11.085, "duration": 3.65, "cents": 3.89},
+    {"midi": 50, "start": 14.78, "duration": 3.65, "cents": 2.84},
+    {"midi": 53, "start": 18.475, "duration": 3.65, "cents": 1.1},
+    {"midi": 55, "start": 22.17, "duration": 3.65, "cents": 6.0},
+    {"midi": 57, "start": 25.865, "duration": 3.65, "cents": 8.19},
+    {"midi": 59, "start": 29.56, "duration": 3.65, "cents": 5.84},
+    {"midi": 62, "start": 33.255, "duration": 3.65, "cents": -2.79},
+    {"midi": 64, "start": 36.95, "duration": 3.65, "cents": 4.95},
+    {"midi": 67, "start": 40.645, "duration": 3.65, "cents": 6.96},
+    {"midi": 70, "start": 44.34, "duration": 3.65, "cents": -0.13},
+    {"midi": 73, "start": 48.035, "duration": 3.65, "cents": 0.86},
+    {"midi": 76, "start": 51.73, "duration": 3.65, "cents": 5.45},
+    {"midi": 79, "start": 55.425, "duration": 3.65, "cents": -1.86},
+    {"midi": 82, "start": 59.12, "duration": 3.65, "cents": -2.25},
+    {"midi": 84, "start": 62.815, "duration": 2.42628, "cents": -6.16}
+  ]
+}

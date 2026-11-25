@@ -366,3 +366,21 @@ test('opens and continues a saved session offline from a Pages-style subpath', a
   await page.getByRole('button', { name: 'Continue' }).click()
   await expect(page.getByRole('heading', { name: 'Find the open A string.' })).toBeVisible()
 })
+
+test('keeps the guitar sound preference and both audio banks available offline', async ({ page, context }) => {
+  await page.goto('./')
+  await page.getByRole('link', { name: 'Sound settings' }).click()
+  const instrument = page.getByRole('combobox', { name: 'Instrument', exact: true })
+  await expect(instrument).toHaveValue('electric')
+  await instrument.selectOption('acoustic')
+  await page.getByText('Ready to use offline').waitFor({ timeout: 15_000 })
+  const samples = await page.evaluate(async () => {
+    const cache = await caches.open((await caches.keys()).find((key) => key.startsWith('guitar-lab:'))!)
+    return (await cache.keys()).map(({ url }) => url).filter((url) => url.endsWith('.mp3'))
+  })
+  expect(samples).toHaveLength(2)
+  await context.setOffline(true)
+  await page.reload()
+  await expect(instrument).toHaveValue('acoustic')
+  for (const url of samples) expect(await page.evaluate(async (path) => (await fetch(path)).ok, url)).toBe(true)
+})

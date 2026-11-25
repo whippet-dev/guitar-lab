@@ -100,8 +100,8 @@ function PositionCheck({ exercise, response, onResponse }: {
   return (
     <>
       {listening ? <div className="listening-prompt">
-        <p className="teaching-copy">{listening.length === 2 ? 'Hear the pair, then tap a fret that matches the second pitch.' : 'Hear the phrase, then tap a fret that matches the final pitch.'} Use the hint if you’re practising without sound.</p>
-        <AudioButton pitches={listening} label={listening.length === 2 ? 'Hear the two notes' : 'Hear the phrase'} />
+        <p className="teaching-copy">{listening.length === 2 ? 'Hear the pair, then tap a fret that matches the second pitch.' : 'Hear the phrase, then tap a fret that matches the final pitch.'} This check uses a pure tone so you can focus on pitch. Use the hint if you’re practising without sound.</p>
+        <AudioButton pitches={listening} reference label={listening.length === 2 ? 'Hear the two notes' : 'Hear the phrase'} />
       </div> : <p className="teaching-copy">Tap a position on the fretboard.</p>}
       <Fretboard range={exercise.range} guideString={exercise.string} selected={response?.position} onSelect={submit} locked={finished}
         reveal={reveal ?? response?.position ?? anchor} marker={(position) => samePosition(response?.position, position) ? { label: exerciseNoteName(exercise, position), kind: finished ? 'target' : undefined }
@@ -115,11 +115,11 @@ function PositionCheck({ exercise, response, onResponse }: {
       </div>
       <div className="exercise-tools">
         {!finished && <>
-          {targetPitch !== undefined && response && <AudioButton pitches={[targetPitch, pitchAt(response.position)]} label="Hear target, then your note" />}
+          {targetPitch !== undefined && response && <AudioButton pitches={[targetPitch, pitchAt(response.position)]} reference label="Hear target, then your note" />}
           <button className="button button-secondary" type="button" aria-expanded={hint} aria-controls="exercise-hint" onClick={() => setHint(!hint)}><Lightbulb size={17} />{hint ? 'Hide hint' : 'Get a hint'}</button>
           <button className="button button-quiet" type="button" onClick={showAnswer}>Show answer</button>
         </>}
-        {finished && <AudioButton pitches={listening ?? (anchor ? [pitchAt(anchor), pitchAt(response.position)].sort((a, b) => a - b) : [pitchAt(response.position)])} label="Hear the answer" />}
+        {finished && <AudioButton pitches={listening ?? (anchor ? [pitchAt(anchor), pitchAt(response.position)].sort((a, b) => a - b) : [pitchAt(response.position)])} reference={!!listening} label="Hear the answer" />}
       </div>
       {!finished && <p id="exercise-hint" className="hint" hidden={!hint}>{exercise.hint}</p>}
     </>

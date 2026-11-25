@@ -1,10 +1,12 @@
-import { Activity, ArrowDownToLine, ArrowRight, AudioLines, BookOpen, ChartNoAxesColumn, Clock3, Guitar, House, Laptop, Play } from 'lucide-react'
+import { Activity, ArrowDownToLine, ArrowRight, AudioLines, BookOpen, ChartNoAxesColumn, Clock3, Guitar, House, Laptop, Play, Volume2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { findExercise, findTopic, TOPICS } from '../learning/content'
 import { advanceSession, planSession, recordAttempt, markLesson, saveSessionResponse, SESSION_MINUTES, type Progress } from '../learning/progress'
 import { newId, useProgress } from '../learning/useProgress'
 import { DailyPractice, ExerciseView, Lesson, Library, ProgressView } from './Learning'
 import { Explorer } from './Explorer'
+import { SoundSettings } from './SoundSettings'
+import { stopAudio } from '../music/audio'
 import heroImage from '../assets/fretboard-hero.webp'
 
 const NAVIGATION = [
@@ -15,7 +17,7 @@ const NAVIGATION = [
 
 function currentRoute() {
   const route = window.location.hash.slice(1)
-  return /^(today|learn|practice|fretboard|progress|learn\/[a-z-]+|exercise\/[a-z-]+)$/.test(route) ? route : 'today'
+  return /^(today|learn|practice|fretboard|progress|sound|learn\/[a-z-]+|exercise\/[a-z-]+)$/.test(route) ? route : 'today'
 }
 
 function Header({ area }: { area: string }) {
@@ -26,7 +28,10 @@ function Header({ area }: { area: string }) {
         <nav className="main-nav" aria-label="Main navigation">
           {NAVIGATION.map(({ route, label, icon: Icon }) => <a key={route} href={`#${route}`} aria-current={area === route ? 'page' : undefined}><Icon size={17} />{label}</a>)}
         </nav>
-        <a href="#progress" className="progress-link" aria-current={area === 'progress' ? 'page' : undefined}><ChartNoAxesColumn size={18} />Progress</a>
+        <div className="header-actions">
+          <a href="#sound" className="progress-link sound-link" aria-label="Sound settings" aria-current={area === 'sound' ? 'page' : undefined}><Volume2 size={18} /><span>Sound</span></a>
+          <a href="#progress" className="progress-link" aria-current={area === 'progress' ? 'page' : undefined}><ChartNoAxesColumn size={18} />Progress</a>
+        </div>
       </div>
     </header>
   )
@@ -99,9 +104,16 @@ export function App() {
   const area = page === 'practice' ? 'today' : page === 'exercise' ? 'learn' : page
 
   useEffect(() => {
-    const navigate = () => setRoute(currentRoute())
+    const navigate = () => { stopAudio(); setRoute(currentRoute()) }
+    const onVisibility = () => { if (document.hidden) stopAudio() }
     window.addEventListener('hashchange', navigate)
-    return () => window.removeEventListener('hashchange', navigate)
+    window.addEventListener('pagehide', stopAudio)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.removeEventListener('hashchange', navigate)
+      window.removeEventListener('pagehide', stopAudio)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [])
 
   useEffect(() => {
@@ -130,6 +142,7 @@ export function App() {
         {page === 'exercise' && (exercise ? <ExerciseView key={exercise.id} exercise={exercise} onAttempt={(response) => update((latest) => recordAttempt(latest, { id: newId(), exercise: exercise.id, result: response.result, at: Date.now() }))} /> : <Library progress={progress} />)}
         {page === 'fretboard' && <Explorer />}
         {page === 'progress' && <ProgressView progress={progress} />}
+        {page === 'sound' && <SoundSettings />}
       </main>
       <Footer storageAvailable={storageAvailable} />
     </div>

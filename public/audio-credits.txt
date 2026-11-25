@@ -1,0 +1,25 @@
+Guitar Lab guitar recordings
+
+Clean electric guitar
+FreePats FSBS Electric Guitar Clean #1, version 2026-08-07.
+Direct-sampled Fender guitar, bridge pickup, processed to a clean guitar sound by FreePats.
+Source: https://freepats.zenvoid.org/ElectricGuitar/clean-electric-guitar.html
+Release: https://github.com/freepats/electric-guitar-FSBS-clean/releases/tag/2026-08-07
+Archive: EGuitarFSBS-clean-SFZ+FLAC-20260807.7z
+SHA-256: a929a3cbfc8289e325be56dab49f5fd560bbc3995c40b69f8f05caee380e8be3
+
+Acoustic guitar
+Meta Steel Guitar, Meta Open Sound, version 1.0.0.
+Steel-string acoustic guitar, medium-velocity layer of the instrument's Ogg collection.
+Source: https://github.com/facebookincubator/Meta-open-sound/tree/meta-steel-guitar-v1.0.0/systems/instruments/meta-steel-guitar
+Release: https://github.com/facebookincubator/Meta-open-sound/releases/tag/meta-steel-guitar-v1.0.0
+Archive: meta-open-sound-meta-steel-guitar-ogg.zip
+SHA-256: a06baf193497ba36f20ccb67018e9f106155ad5e4f81d8a672530498038f68ed
+Selected recordings were checked against the publisher's SHA256SUMS.
+
+Both recording collections are dedicated to the public domain under CC0 1.0 Universal.
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Guitar Lab uses 18 recordings from each collection. Each is folded to mono, trimmed
+to at most 3.65 seconds, level-matched and packed into an MP3 bank. The sampler
+corrects measured pitch offsets on playback. No recording is streamed from its publisher.

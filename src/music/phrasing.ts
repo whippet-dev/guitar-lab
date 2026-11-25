@@ -27,6 +27,9 @@ export const MELODIES: readonly { label: string; detail: string; slots: Melody }
 export function phraseVoices(melody: Melody, backing: (typeof BACKINGS)[number], quaver: number, withChords: boolean): TimedNote[] {
   const lead = melody.flatMap((position, slot) => position ? [{ pitch: pitchAt(position), at: slot * quaver, duration: quaver * 0.8, volume: 0.22 }] : [])
   if (!withChords) return lead
-  const harmony = backing.flatMap((chord, bar) => chord.pitches.map((pitch) => ({ pitch: pitch - 12, at: bar * BAR_SLOTS * quaver, duration: BAR_SLOTS * quaver, volume: 0.065 })))
+  const harmony = backing.flatMap((chord, bar) => {
+    const octaveDrop = chord.pitches[0] >= 52 ? 12 : 0
+    return chord.pitches.map((pitch) => ({ pitch: pitch - octaveDrop, at: bar * BAR_SLOTS * quaver, duration: BAR_SLOTS * quaver, volume: 0.065 }))
+  })
   return [...harmony, ...lead]
 }

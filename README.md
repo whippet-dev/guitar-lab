@@ -20,6 +20,8 @@ npm run preview
 
 Open `http://localhost:4173`. Visit online once to cache the app. On an iPhone, open a deployed HTTPS copy in Safari, choose **Share → Add to Home Screen**, and enable **Open as Web App** when offered. Open the installed app online before going offline. Progress stays in the storage context where you practised. [Apple’s iPhone guide](https://support.apple.com/guide/iphone/bookmark-a-website-iph42ab2f3a7/ios)
 
+Open **Sound** using the speaker icon to choose clean electric guitar, steel-string acoustic guitar or a pure reference tone. Both guitar banks are included in the offline cache.
+
 ## Checks
 
 ```sh
@@ -43,3 +45,4 @@ Push this project to a GitHub repository with a `main` branch and set **Settings
 - [Curriculum](CURRICULUM.md)
 - [Architecture](ARCHITECTURE.md)
 - [Roadmap](ROADMAP.md)
+- [Guitar recording sources and licences](public/audio-credits.txt)

@@ -12,4 +12,5 @@ it('keeps rests silent and places melody and chord changes on the same clock', (
   ])
   expect(arranged.slice(6)).toEqual(lead)
   expect(phraseVoices(example.slots, BACKINGS[1], quaver, true).slice(6)).toEqual(lead)
+  expect(phraseVoices(example.slots, BACKINGS[2], quaver, true).every(({ pitch }) => pitch >= 40)).toBe(true)
 })

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Play, Square } from 'lucide-react'
 import { secondsPerQuaver, slotName } from '../learning/rhythm'
-import { playTimedNotes, stopAudio } from '../music/audio'
+import { playTimedNotes } from '../music/audio'
 import { BACKINGS, BAR_SLOTS, MELODIES, phraseVoices } from '../music/phrasing'
 import { pitchAt, pitchClass, positionName, scaleNotes, type Position } from '../music/theory'
 import { Fretboard, toneKind } from './Fretboard'
@@ -18,10 +18,9 @@ export function PhraseLab() {
   const [tempo, setTempo] = useState(80)
   const [slot, setSlot] = useState(0)
   const [active, setActive] = useState<number | null>(null)
-  const [silent, setSilent] = useState(false)
+  const [audioStatus, setAudioStatus] = useState<'silent' | 'fallback'>()
   const timer = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
-  const playRequest = useRef(0)
-  const ownPlayback = useRef(false)
+  const playRequest = useRef<AbortController>(undefined)
   const showing = active ?? slot
   const bar = Math.floor(showing / BAR_SLOTS)
   const backing = BACKINGS[backingIndex]
@@ -31,17 +30,24 @@ export function PhraseLab() {
   const chosenNote = notes.find(({ pitch }) => pitch === chosenPitch)
   const chordRole = chord.notes.findIndex(({ pitch }) => pitch === chosenPitch)
 
-  useEffect(() => () => {
-    playRequest.current += 1
-    clearInterval(timer.current)
-    if (ownPlayback.current) stopAudio()
+  useEffect(() => {
+    function onVisibility() {
+      if (!document.hidden) return
+      playRequest.current?.abort()
+      clearInterval(timer.current)
+      setActive(null)
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      playRequest.current?.abort()
+      clearInterval(timer.current)
+    }
   }, [])
 
   function stop() {
-    playRequest.current += 1
+    playRequest.current?.abort()
     clearInterval(timer.current)
-    if (ownPlayback.current) stopAudio()
-    ownPlayback.current = false
     setActive(null)
   }
 
@@ -53,17 +59,19 @@ export function PhraseLab() {
   }
 
   async function play() {
-    const request = ++playRequest.current
+    const request = new AbortController()
+    playRequest.current = request
     const quaver = secondsPerQuaver(tempo)
     setActive(0)
-    ownPlayback.current = true
     try {
-      await playTimedNotes(phraseVoices(melody, backing, quaver, withChords))
-      if (request === playRequest.current) setSilent(false)
+      const result = await playTimedNotes(phraseVoices(melody, backing, quaver, withChords), { signal: request.signal })
+      if (request.signal.aborted) return
+      if (result === 'cancelled') { setActive(null); return }
+      setAudioStatus(result === 'fallback' ? 'fallback' : undefined)
     } catch {
-      if (request === playRequest.current) setSilent(true)
+      if (!request.signal.aborted) setAudioStatus('silent')
     }
-    if (request !== playRequest.current) return
+    if (request.signal.aborted) return
     const start = performance.now()
     timer.current = setInterval(() => {
       const current = Math.floor((performance.now() - start) / (quaver * 1000))
@@ -108,7 +116,8 @@ export function PhraseLab() {
       <button type="button" className="button button-secondary" aria-pressed={withChords} onClick={() => { stop(); setWithChords(!withChords) }}>Backing chords</button>
       <button type="button" className="button button-quiet" disabled={!chosen} onClick={() => edit(null)}>Make this a rest</button>
     </div>
-    {silent && <p className="lab-instruction">Audio is unavailable here. The highlighted beat still follows the phrase.</p>}
+    {audioStatus === 'silent' && <p className="lab-instruction">Audio is unavailable here. The highlighted beat still follows the phrase.</p>}
+    {audioStatus === 'fallback' && <p className="lab-instruction">Playing the reference tone.</p>}
     <p className="lab-instruction" aria-live={active === null ? 'polite' : 'off'}>{chosenNote ? <>
       <strong>{chosenNote.name}</strong> {chordRole >= 0 ? `is the ${roleNames[chordRole]} of ${chord.label}. Try it as a landing note.`
         : `lies outside ${chord.label}. Hear the colour it adds, then try moving to one of the outlined chord tones.`}

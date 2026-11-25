@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Play } from 'lucide-react'
-import { playGroups } from '../music/audio'
+import { playTimedNotes, type TimedNote } from '../music/audio'
 import { rhythmDifference, secondsPerQuaver, slotName } from '../learning/rhythm'
 import type { RhythmExercise } from '../learning/content'
 import type { RhythmResponse } from '../learning/progress'
@@ -17,32 +17,42 @@ export function RhythmLab({ check }: { check?: Check }) {
   const [hint, setHint] = useState(false)
   const [silent, setSilent] = useState(false)
   const clock = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
-  const playRequest = useRef(0)
+  const playRequest = useRef<AbortController>(undefined)
   const response = check?.response
   const finished = !!response && response.result !== 'retry'
   const attempted = response && response.slots.length === slots.length && response.slots.every((slot) => slots.includes(slot))
   const difference = check && rhythmDifference(check.exercise.slots, slots)
 
-  useEffect(() => () => {
-    playRequest.current += 1
-    clearInterval(clock.current)
+  useEffect(() => {
+    function onVisibility() {
+      if (!document.hidden) return
+      playRequest.current?.abort()
+      clearInterval(clock.current)
+      setActive(null)
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      playRequest.current?.abort()
+      clearInterval(clock.current)
+    }
   }, [])
 
   async function play() {
-    const request = ++playRequest.current
+    playRequest.current?.abort()
+    const request = new AbortController()
+    playRequest.current = request
     clearInterval(clock.current)
     const quaver = secondsPerQuaver(tempo)
-    const bar = Array.from({ length: 8 }, (_, slot) => [
-      ...(slot % 2 === 0 ? [slot === 0 ? 88 : 83] : []),
-      ...(slots.includes(slot) ? [50] : []),
-    ])
+    const clicks: TimedNote[] = beats.map((slot) => ({ pitch: slot === 0 ? 88 : 83, voice: 'click', at: slot * quaver, duration: 0.055, volume: 0.10 }))
+    const notes = slots.map((slot) => ({ pitch: 50, at: slot * quaver, duration: 0.14, volume: 0.18 }))
     let unavailable = false
     try {
-      await playGroups(bar, quaver, 0.16)
+      if (await playTimedNotes([...clicks, ...notes], { signal: request.signal }) === 'cancelled') return
     } catch {
       unavailable = true
     }
-    if (request !== playRequest.current) return
+    if (request.signal.aborted) return
     setSilent(unavailable)
     setActive(0)
     const start = performance.now()

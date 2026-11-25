@@ -37,8 +37,8 @@ function ChordFretboard({ root, quality, positions, comparison = [] }: {
         : comparison.length ? `${shared.length} ${shared.length === 1 ? 'fret position belongs' : 'fret positions belong'} to both shapes. A double ring marks each shared position.` : `${bass.name} is the lowest note. Tap a marked fret to check its role.`}</p>
     </div>
     <div className="lab-choices">
-      <AudioButton pitches={positions.map(pitchAt)} together label="Hear shape" />
-      {comparison.length > 0 && <AudioButton pitches={comparison.map(pitchAt)} together label="Hear next shape" />}
+      <AudioButton pitches={positions.map(pitchAt)} together strum label="Hear shape" />
+      {comparison.length > 0 && <AudioButton pitches={comparison.map(pitchAt)} together strum label="Hear next shape" />}
       {current && <AudioButton pitches={[pitchAt(current)]} label="Hear note" />}
     </div>
   </>
