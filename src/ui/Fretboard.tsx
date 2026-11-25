@@ -14,6 +14,7 @@ export function toneKind(degree: number, semitones: number): ToneKind | undefine
 type FretboardProps = {
   range?: readonly [number, number]
   selected?: Position | null
+  sounding?: Position | null
   selectedPositions?: readonly Position[]
   onSelect: (position: Position) => void
   marker?: (position: Position) => Marker | undefined
@@ -28,7 +29,7 @@ type FretboardProps = {
 const inlays = [3, 5, 7, 9, 12, 15, 17, 19, 21, 24]
 const stringGauges = [1, 1.12, 1.28, 1.5, 1.8, 2.12]
 
-export function Fretboard({ range = [0, MAX_FRET], selected, selectedPositions, marker, onSelect, guideString, travelled, reveal, locked, label, viewRef }: FretboardProps) {
+export function Fretboard({ range = [0, MAX_FRET], selected, sounding, selectedPositions, marker, onSelect, guideString, travelled, reveal, locked, label, viewRef }: FretboardProps) {
   const [first, last] = range
   const frets = Array.from({ length: last - first + 1 }, (_, index) => first + index)
   const firstFretted = Math.max(1, first)
@@ -122,12 +123,13 @@ export function Fretboard({ range = [0, MAX_FRET], selected, selectedPositions, 
                   const position = { string, fret }
                   const mark = marker?.(position)
                   const pressed = samePosition(selected, position) || !!selectedPositions?.some((item) => samePosition(item, position))
+                  const isSounding = samePosition(sounding, position)
                   const inStep = travelled && string === travelled.from.string && string === travelled.to.string && fret >= travelled.from.fret && fret <= travelled.to.fret
                   return (
                     <button key={fret} type="button" data-position={`${string}-${fret}`}
-                      className={`fret-cell${pressed ? ' is-selected' : ''}${inStep ? ' is-travelled' : ''}`}
+                      className={`fret-cell${pressed ? ' is-selected' : ''}${isSounding ? ' is-sounding' : ''}${inStep ? ' is-travelled' : ''}`}
                       aria-label={mark?.spokenLabel ?? `${positionName(position)}${mark ? `, ${mark.label}` : ''}`}
-                      aria-pressed={pressed} aria-disabled={locked || undefined} tabIndex={cursor.string === string && activeFret === fret ? 0 : -1}
+                      aria-pressed={pressed} aria-current={isSounding || undefined} aria-disabled={locked || undefined} tabIndex={cursor.string === string && activeFret === fret ? 0 : -1}
                       onFocus={() => setCursor(position)} onKeyDown={(event) => moveFocus(event, position)} onClick={() => { if (!locked) onSelect(position) }}>
                       {mark && <span className={`fret-note${mark.kind ? ` ${mark.kind}` : ''}${mark.comparison ? ` is-${mark.comparison}` : ''}`}>{mark.label}</span>}
                     </button>

@@ -278,6 +278,8 @@ h1:focus, main:focus { outline: none; }
 .fret-note.target, .fret-cell.is-selected .fret-note { color: var(--tone-text, var(--accent-ink)); border-color: var(--tone-edge, var(--accent)); background: var(--tone-surface, var(--accent)); }
 .fret-cell.is-selected .fret-note:is(.root, .third, .fifth) { outline: 1px solid #ede3fb; outline-offset: 2px; }
 .fret-cell.is-selected .fret-note.is-shared { outline-offset: 4px; }
+.fret-cell.is-sounding { background-color: #c6aaff35; box-shadow: inset 0 0 0 1px var(--accent); }
+.fret-cell.is-sounding .fret-note { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); outline: 2px solid #f0e4ff; outline-offset: 2px; }
 .shape-tab { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
 .explorer-result { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 7px 12px; min-height: 52px; margin-top: 9px; }
 .explorer-result > div:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }

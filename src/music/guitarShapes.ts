@@ -1,5 +1,37 @@
 import { TRIADS, triadVoicing, type TriadInversion, type TriadKind } from './harmony'
-import { MAX_FRET, pitchClass, STRINGS, type Position, type StringIndex } from './theory'
+import { MAX_FRET, pitchClass, scalePitchesInRange, STRINGS, type Position, type ScaleKind, type StringIndex } from './theory'
+
+type ScaleStep = { position: Position; cost: number; previous?: ScaleStep }
+
+export function scalePath(root: number, kind: ScaleKind, range: readonly [number, number]) {
+  const [first, last] = range
+  let choices: ScaleStep[] = []
+  // Remember the easiest route to each fret. Prefer small shifts and neighbouring strings.
+  for (const pitch of scalePitchesInRange(root, kind, range)) {
+    choices = STRINGS.flatMap(({ midi }, string) => {
+      const fret = pitch - midi
+      if (fret < first || fret > last) return []
+      let best: ScaleStep | undefined
+      let cost = Infinity
+      for (const choice of choices) {
+        const crossing = choice.position.string - string
+        if (crossing < 0) continue
+        const move = Math.abs(choice.position.fret - fret)
+        const effort = choice.cost + move + 3 * Math.max(0, move - 3) + crossing ** 2
+        if (effort < cost) { best = choice; cost = effort }
+      }
+      if (choices.length && !best) return []
+      return [{ position: { string: string as StringIndex, fret }, cost: (best ? cost : 0) + (fret - first) / 10, previous: best }]
+    })
+  }
+  const route: Position[] = []
+  let step = choices.reduce<ScaleStep | undefined>((best, choice) => !best || choice.cost < best.cost ? choice : best, undefined)
+  while (step) {
+    route.push(step.position)
+    step = step.previous
+  }
+  return route.reverse()
+}
 
 // Fret offsets in strumming order, from the thickest string to the thinnest.
 export const CAGED = [

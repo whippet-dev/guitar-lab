@@ -4,7 +4,7 @@ import { frequencyOf } from './theory'
 
 export type TimedNote = { pitch: number; at: number; duration: number; volume: number; voice?: 'reference' | 'click' }
 type PlaybackResult = 'playing' | 'fallback' | 'cancelled'
-type PlaybackOptions = { reference?: boolean; signal?: AbortSignal; strum?: boolean }
+type PlaybackOptions = { reference?: boolean; signal?: AbortSignal; strum?: boolean; onStart?: (elapsed: () => number | undefined) => void }
 type Mixer = { context: AudioContext; output: DynamicsCompressorNode }
 type Voice = { source: AudioScheduledSourceNode; gain: AudioParam; start: number; end: number }
 
@@ -177,6 +177,7 @@ export async function playTimedNotes(notes: readonly TimedNote[], options: Playb
   const guitar = instrument && buffer ? { instrument, buffer } : undefined
   const start = context.currentTime + 0.018
   notes.forEach((note) => scheduleVoice(audio, note, start, guitar))
+  options.onStart?.(() => request === playback && context.state === 'running' ? context.currentTime - start : undefined)
   return instrument && !buffer ? 'fallback' : 'playing'
 }
 

@@ -1,8 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import { tonicTriadKind, TRIADS, triadKind, triadNotes, triadVoicing } from './harmony'
 import { chordsInMajorKey } from './progression'
-import { cagedRoute, formPositions, guitarTriads } from './guitarShapes'
-import { MAX_FRET, pitchAt, pitchClass, samePosition, SCALES } from './theory'
+import { cagedRoute, formPositions, guitarTriads, scalePath } from './guitarShapes'
+import { MAX_FRET, pitchAt, pitchClass, samePosition, SCALES, scalePitchesInRange, type ScaleKind } from './theory'
+
+it('finds an ascending scale route from thicker to thinner strings in each explorer range', () => {
+  const ranges = [[0, 5], [0, 12], [6, 12], [13, 18], [19, 24], [0, 24]] as const
+  for (const kind of Object.keys(SCALES) as ScaleKind[]) {
+    for (let root = 0; root < 12; root++) {
+      for (const range of ranges) {
+        const path = scalePath(root, kind, range)
+        expect(path.map(pitchAt)).toEqual(scalePitchesInRange(root, kind, range))
+        expect(path.every(({ fret }) => fret >= range[0] && fret <= range[1])).toBe(true)
+        expect(path.slice(1).every(({ string }, index) => string <= path[index].string)).toBe(true)
+      }
+    }
+  }
+  const aMinor = scalePath(9, 'minorPentatonic', [0, 5])
+  expect(aMinor[0]).toEqual({ string: 5, fret: 0 })
+  expect(aMinor.slice(1).every((position, index) => Math.abs(position.fret - aMinor[index].fret) <= 3)).toBe(true)
+})
 
 describe('triads and keys', () => {
   it('uses the third and fifth to distinguish the four qualities and spell the chord', () => {

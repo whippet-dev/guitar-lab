@@ -3,7 +3,9 @@ import { CircleHelp, Guitar } from 'lucide-react'
 import { Fretboard, toneKind } from './Fretboard'
 import { FretboardPractice } from './FretboardPractice'
 import { AudioButton } from './AudioButton'
-import { degreeSymbol, INTERVALS, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, scalePitchesInRange, scaleSteps, type Position, type ScaleKind, type Spelling } from '../music/theory'
+import { ScalePlayback } from './ScalePlayback'
+import { degreeSymbol, INTERVALS, intervalFrom, intervalNote, noteName, octaveOf, pitchAt, pitchClass, positionName, SCALES, scaleNotes, scaleSteps, type Position, type ScaleKind, type Spelling } from '../music/theory'
+import { scalePath } from '../music/guitarShapes'
 import { tonicTriadKind, TRIADS } from '../music/harmony'
 
 const MODES = ['Notes', 'Scales', 'Intervals', 'Practice'] as const
@@ -33,6 +35,7 @@ export function Explorer() {
   const [spelling, setSpelling] = useState<Spelling>('common')
   const [range, setRange] = useState(0)
   const [selected, setSelected] = useState<Position | null>(null)
+  const [sounding, setSounding] = useState<Position | null>(null)
   const scale = scaleNotes(root, kind, spelling).map((note) => {
     const interval = intervalFrom(root, note.pitch)
     return { ...note, interval, symbol: degreeSymbol(note.degree, interval.semitones), role: toneKind(note.degree, interval.semitones) }
@@ -97,14 +100,14 @@ export function Explorer() {
             <div className="segmented scale-labels" role="group" aria-label="Scale fretboard labels">
               {scaleLabels.map((label) => <button key={label} type="button" aria-pressed={scaleLabel === label} onClick={() => setScaleLabel(label)}>{label}</button>)}
             </div>
-            <AudioButton key={`${root}-${kind}-${range}`} groups={scalePitchesInRange(root, kind, RANGES[range]).map((note) => [note])} gap={0.34} label="Hear scale" />
+            <ScalePlayback key={`${root}-${kind}-${range}`} path={scalePath(root, kind, RANGES[range])} onPosition={setSounding} />
             <ul className="scale-legend" aria-label="Highlighted scale degrees">
               {scale.map(({ role, symbol }) => role && <li key={symbol}><span className={`fret-note ${role}`}>{symbol}</span>{roleNames[role]}</li>)}
             </ul>
           </div>}
           {mode === 'Intervals' && <p className="explorer-guide">An <strong>interval</strong> is the distance between two pitches. Here the starting note {rootName} is marked 1. The labels repeat in each octave, so you can find the same relationship anywhere on the neck.</p>}
           <div className="board-caption"><span>Standard tuning</span><span aria-label="Thickest to thinnest, E, A, D, G, B, E">E A D G B E</span></div>
-          <Fretboard key={range} range={RANGES[range]} selected={selected} onSelect={setSelected} marker={marker} />
+          <Fretboard key={range} range={RANGES[range]} selected={selected} sounding={sounding} reveal={sounding} onSelect={setSelected} marker={marker} />
           <div className="explorer-result">
             <div aria-live="polite" className={selectedScaleNote && mode === 'Scales' ? 'scale-selection' : undefined}>
               {selected && pitch !== null ? <>
@@ -140,7 +143,7 @@ export function Explorer() {
             </div>
             <details className="explanation">
               <summary><CircleHelp size={17} /> How do the scale options differ?</summary>
-              <p><strong>Hear scale</strong> plays the scale notes available in your chosen fret range, from low to high. Two strings can give you the same pitch. You’ll hear that pitch once.</p>
+              <p><strong>Hear scale</strong> plays the notes in your chosen fret range, from low to high. The highlight follows one route from the thicker strings towards the thinner ones, favouring small shifts when a pitch is available in several places.</p>
               <p>A scale is an ordered pattern of pitches. The steps above measure the gaps between its notes, including the last step back to the tonic an octave higher. W is a whole step (two semitones) and H is a half step (one semitone).</p>
               <p>Major and natural minor each use seven notes. Pentatonic means five notes. Major pentatonic leaves out 4 and 7 from the major scale. Minor pentatonic leaves out 2 and ♭6 from natural minor. Both have some gaps of three semitones.</p>
               <p>Scale degrees describe intervals from the tonic. A ♭3 is a third one semitone lower than in the major scale on the same tonic. C is the second note of A minor pentatonic, but its degree is still ♭3.</p>

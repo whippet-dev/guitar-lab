@@ -248,6 +248,28 @@ test('shows scale roles by note and degree, and updates the triad with the tonic
   await expect(page.getByText('E, G♯ and B form the E major triad.')).toBeVisible()
 })
 
+test('follows the scale on one fret at a time and clears the highlight when the range changes', async ({ page }) => {
+  test.skip(!(await page.evaluate(() => typeof AudioContext === 'function')), 'Web Audio is unavailable on this browser host')
+  await page.goto('./#sound')
+  await page.getByRole('combobox', { name: 'Instrument', exact: true }).selectOption('reference')
+  await page.getByRole('link', { name: 'Fretboard', exact: true }).click()
+  await page.getByRole('button', { name: 'Scales', exact: true }).click()
+  const current = page.locator('.fret-cell.is-sounding')
+  await page.getByRole('button', { name: 'Hear scale', exact: true }).click()
+  await expect(current).toHaveCount(1)
+  const first = await current.getAttribute('data-position')
+  await expect(current).not.toHaveAttribute('data-position', first!)
+  await expect(current).toHaveCount(1)
+  await page.getByRole('button', { name: 'Stop scale', exact: true }).click()
+  await expect(current).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Hear scale', exact: true }).click()
+  await expect(current).toHaveCount(1)
+  await page.getByRole('combobox', { name: 'Fret range', exact: true }).selectOption({ label: '6–12' })
+  await expect(current).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Hear scale', exact: true })).toBeVisible()
+})
+
 test('practises finding and naming notes without replacing or moving the board', async ({ page }) => {
   await page.goto('./#fretboard')
   await page.getByRole('button', { name: 'Practice', exact: true }).click()
